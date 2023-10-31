@@ -7,7 +7,7 @@ from skimage import data
 from skimage.color import rgb2gray
 from matplotlib import pyplot as plt
 
-imgky = io.imread('Disease-Simulator\croppednewmap.png')
+imgky = io.imread('croppednewmap.png')
 #grayky = rgb2gray(imgky)
 print(type(imgky))
 print(imgky.size)
@@ -135,7 +135,7 @@ class CanvasWidget(QWidget):
         else:
             #Before a button is clicked
             painter = QPainter(self)
-            pixmap = QPixmap("Disease-Simulator\croppednewmap.png")
+            pixmap = QPixmap("croppednewmap.png")
             painter.drawPixmap(self.rect(), pixmap)
             
 
