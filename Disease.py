@@ -12,6 +12,9 @@ class Disease:
         #print("Starting Rectangle Width:",self.rectangle['width'],"Height:", self.rectangle['height'])
         print(f"Rectangle Coordinates BEFORE run:", self.pointA, self.pointB, self.pointC, self.pointD)
 
+    def beefus(self):
+        print("beefus")
+        
     def translate(self):    
         if self.trans_type == 'translation':
             self.pointA[0] += self.trans_param
