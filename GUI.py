@@ -7,7 +7,7 @@ from skimage import data
 from skimage.color import rgb2gray
 from matplotlib import pyplot as plt
 
-imgky = io.imread('croppednewmap.png')
+imgky = io.imread('Disease-Simulator\croppednewmap.png')
 #grayky = rgb2gray(imgky)
 print(type(imgky))
 print(imgky.size)
@@ -61,7 +61,7 @@ class DrawingApp(QMainWindow):
         layout.addWidget(self.text_box)
 
         central_widget.setLayout(layout)
-        self.setGeometry(100, 100, 500, 400)
+        self.setGeometry(100, 100, 600, 400)
 
     def translation(self):
         text = self.text_box.text()
@@ -135,8 +135,7 @@ class CanvasWidget(QWidget):
         else:
             #Before a button is clicked
             painter = QPainter(self)
-            pixmap = QPixmap("croppednewmap.png")
-
+            pixmap = QPixmap("Disease-Simulator\croppednewmap.png")
             painter.drawPixmap(self.rect(), pixmap)
             
 
