@@ -2,17 +2,56 @@ from Disease import *
 from PyQt6.QtGui     import *
 from PyQt6.QtWidgets import *
 import sys
-from skimage import io
+from skimage import io, color, filters, morphology, measure, segmentation
 from skimage import data
-from skimage.color import rgb2gray
+from skimage.color import rgb2gray, rgba2rgb
 from matplotlib import pyplot as plt
+from skimage.morphology import closing, square
+from skimage.segmentation import clear_border
+import cv2
+import numpy as np
 
+#take image, remove opacities, make grayscale
 imgky = io.imread('croppednewmap.png')
-#grayky = rgb2gray(imgky)
-print(type(imgky))
-print(imgky.size)
-print(imgky.shape)
-io.imshow(imgky)
+image = color.rgba2rgb(imgky)
+print(image[200, 200])
+plt.imshow(image)
+plt.show()
+#target_color =[0.443, 0.659, 0.678]
+white_color = [1.0, 1.0, 1.0]
+
+orange_color = [0.90980392, 0.5254902, 0.10196078]
+pennyroyal = [0.443, 0.659, 0.678]
+
+
+def getRegion(color):
+    region = []
+    for row in image:
+        row_result = []
+        for pixel in row:
+            if np.allclose(pixel, color):
+                row_result.append([1.0, 1.0, 1.0])
+            else:
+                row_result.append([0.0, 0.0, 0.0])
+        region.append(row_result)
+    with open('orangeregion.txt', 'w') as f:
+        for row in region:
+            f.write(str(row) + '\n')
+    return(region)
+
+orangeRegion = getRegion(orange_color)
+
+
+# Convert the list to a NumPy array
+orangeRegion = np.array(orangeRegion)
+
+# Create a new figure for the white region
+plt.figure(figsize=(8, 8))
+
+# Display the white region
+plt.imshow(orangeRegion)
+plt.title('White Region')
+plt.axis('off')
 plt.show()
 
 class DrawingApp(QMainWindow):
@@ -60,6 +99,8 @@ class DrawingApp(QMainWindow):
         central_widget.setLayout(layout)
         self.setGeometry(100, 100, 600, 600)
 
+
+    #Define what you want buttons to do
     def translation(self):
         text = self.text_box.text()
         if text:
