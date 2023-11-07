@@ -15,9 +15,6 @@ print(imgky.shape)
 io.imshow(imgky)
 plt.show()
 
-rect_width = 60
-rect_height = 40
-
 class DrawingApp(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -34,22 +31,22 @@ class DrawingApp(QMainWindow):
         button_layout = QHBoxLayout()
 
         #Create buttons with their functions
-        self.translate_button = QPushButton("PlaceHolder0", central_widget)
+        self.diseaseType0Button = QPushButton("DiseaseType0", central_widget)
         #self.translate_button.clicked.connect(self.translation)
 
-        self.rotate_button = QPushButton("PlaceHolder1", central_widget)
+        self.diseaseType1Button = QPushButton("DiseaseType1", central_widget)
         #self.rotate_button.clicked.connect(self.rotation)
 
-        self.shear_button = QPushButton("PlaceHolder2", central_widget)
+        self.diseaseType2Button = QPushButton("DiseaseType3", central_widget)
         #self.shear_button.clicked.connect(self.shear)
 
-        self.scale_button = QPushButton("PlaceHolder3", central_widget)
+        self.diseaseType3Button = QPushButton("DiseaseType4", central_widget)
         #self.scale_button.clicked.connect(self.scale)
 
-        button_layout.addWidget(self.translate_button)
-        button_layout.addWidget(self.rotate_button)
-        button_layout.addWidget(self.shear_button)
-        button_layout.addWidget(self.scale_button)
+        button_layout.addWidget(self.diseaseType0Button)
+        button_layout.addWidget(self.diseaseType1Button)
+        button_layout.addWidget(self.diseaseType2Button)
+        button_layout.addWidget(self.diseaseType3Button)
 
         #Create text box for input param
         label = QLabel("Enter Disease parameters:", central_widget)
@@ -61,7 +58,7 @@ class DrawingApp(QMainWindow):
         layout.addWidget(self.text_box)
 
         central_widget.setLayout(layout)
-        self.setGeometry(100, 100, 600, 400)
+        self.setGeometry(100, 100, 600, 600)
 
     def translation(self):
         text = self.text_box.text()
