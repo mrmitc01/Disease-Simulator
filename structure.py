@@ -1,4 +1,5 @@
 from enum import Enum
+import csv
 
 # STRUCTURE
 class Disease:
@@ -27,3 +28,10 @@ class Region:
         self.populaton = population
         self.land_area = land_area
         self.populaton_density = population_density
+
+
+if __name__ == '__main__':
+    with open('./Data Files/KY-Population-Data.csv', newline='') as dataFile:
+        reader = csv.reader(dataFile, delimiter= ' ', quotechar= '|')
+        for row in reader:
+            print(', '.join(row))
