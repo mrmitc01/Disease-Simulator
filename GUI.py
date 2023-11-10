@@ -108,6 +108,18 @@ class DrawingApp(QMainWindow):
         points = Disease.scale()
         self.canvas.setPoints(points)
 
+class CanvasWidget(QWidget):
+    #Keep a list of points so that they can be updated
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.rect_drawn = False
+        self.points = []
+
+    #Send points to be drawn
+    def setPoints(self, points):
+        self.points = points
+        self.rect_drawn = True
+        self.update()
 
 # Represents a canvas where drawings can be displayed.
 class CanvasWidget(QWidget):
