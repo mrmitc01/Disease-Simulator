@@ -61,6 +61,14 @@ class Statistics(Region):
 # Main block: Reads population data from a CSV file and prints each row.
 if __name__ == '__main__':
     with open('./Data Files/KY-Population-Data.csv', newline='') as dataFile:
-        reader = csv.reader(dataFile, delimiter=' ', quotechar='|')
+        reader = csv.reader(dataFile, delimiter= ',', quotechar= '|')
+        header = next(reader)
+        print(header)
+        county_column_index = header.index("ï»¿Region")
+        
+        # This separates the CSV into counties - just a rough start and outline of how we can parse the data
+        counties = []
         for row in reader:
-            print(', '.join(row))
+            county = row[county_column_index]
+            counties.append(county)
+        print(counties)
