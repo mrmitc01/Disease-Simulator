@@ -4,6 +4,7 @@ translating, rotating, shearing, and scaling a rectangle on a canvas.
 """
 
 from Disease import *
+from structure import *
 from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
 import sys
@@ -12,6 +13,9 @@ from matplotlib import pyplot as plt
 import numpy as np
 import json
 
+totalInfected = 0
+totalDead = 0
+totalRecovered = 0
 
 #lightredregion = io.imread('region1.json')
 imgky = io.imread('croppednewmap.png')
@@ -28,6 +32,11 @@ plt.imshow(data)
 class DrawingApp(QMainWindow):
     def __init__(self):
         super().__init__()
+
+        statisticsXCoord = 10
+        infectedLabelYCoord = 350
+        deadLabelYCoord = 365
+        recoveredLabelYCoord = 380
 
         # Initializing widget stuff
         central_widget = QWidget(self)
@@ -57,6 +66,13 @@ class DrawingApp(QMainWindow):
         button_layout.addWidget(self.diseaseType1Button)
         button_layout.addWidget(self.diseaseType2Button)
         button_layout.addWidget(self.diseaseType3Button)
+
+        self.infectedLabel = QLabel("Total Infected: " + str(totalInfected), central_widget)
+        self.infectedLabel.move(statisticsXCoord, infectedLabelYCoord)
+        self.deadLabel = QLabel("Total Dead: " + str(totalDead), central_widget)
+        self.deadLabel.move(statisticsXCoord, deadLabelYCoord)
+        self.recoveredLabel = QLabel("Total Recovered: " + str(totalRecovered), central_widget)
+        self.recoveredLabel.move(statisticsXCoord, recoveredLabelYCoord)
 
         # Create text box for input param
         label = QLabel("Enter Disease parameters:", central_widget)
@@ -112,6 +128,20 @@ class DrawingApp(QMainWindow):
         Disease = Disease('scale', param, rect_width, rect_height)
         points = Disease.scale()
         self.canvas.setPoints(points)
+
+    # Update totalInfected, totalDead, and totalRecovered by passing in additional numInfected,
+    # numDead, and numRecovered. Update statistics labels with these new totals.
+    def updateStatisticsLabels(self, numInfected, numDead, numRecovered):
+        global totalInfected, totalDead, totalRecovered
+
+        totalInfected += numInfected
+        totalDead += numDead
+        totalRecovered += numRecovered
+
+        self.infectedLabel.setText("Total Infected: " + str(numInfected))
+        self.deadLabel.setText("Total Dead: " + str(numDead))
+        self.recoveredLabel.setText("Total Recovered: " + str(numRecovered))
+
 
 class CanvasWidget(QWidget):
     #Keep a list of points so that they can be updated
