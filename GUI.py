@@ -7,18 +7,21 @@ from Disease import *
 from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
 import sys
-from skimage import io
-from skimage import data
-from skimage.color import rgb2gray
+from skimage import io, color
 from matplotlib import pyplot as plt
+import numpy as np
+import json
 
-# Loads an image using skimage and prints information about the image.
+
+#lightredregion = io.imread('region1.json')
 imgky = io.imread('croppednewmap.png')
-print(type(imgky))
-print(imgky.size)
-print(imgky.shape)
-io.imshow(imgky)
-plt.show()
+image = color.rgba2rgb(imgky)
+
+with open('region1.json', "r") as json_file:
+    data = json.load(json_file)
+
+plt.imshow(data)
+
 
 
 # Represents a GUI application for a drawing app.
@@ -67,7 +70,9 @@ class DrawingApp(QMainWindow):
         central_widget.setLayout(layout)
         self.setGeometry(100, 100, 600, 600)
 
+
     # Provides methods for handling button clicks to perform translation, rotation, shear, and scale transformations.
+
     def translation(self):
         text = self.text_box.text()
         if text:
