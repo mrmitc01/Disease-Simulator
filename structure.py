@@ -1,5 +1,18 @@
+"""
+Defines classes for diseases, regions, and statistics. Reads population data from a CSV file.
+"""
+
 from enum import Enum
 import csv
+
+RED_REGION_COUNTIES = ['Trimble', 'Oldham', 'Henry', 'Carroll', 'Shelby', 'Jefferson', 'Bullitt', 'Spencer']
+YELLOW_REGION_COUNTIES = ['Meade', 'Grayson', 'Hardin', 'Larue', 'Washington', 'Marion', 'Taylor', 'Green', 'Hart', 'Edmonson', 'Breckinridge', 'Warren', 'Simpson', 'Barren', 'Allen', 'Metcalfe', 'Monroe', 'Nelson', 'Adair', 'Russell', 'Clinton', 'Cumberland']
+ORANGE_REGION_COUNTIES = ['Hancock', 'Ohio', 'Butler', 'Logan', 'Todd', 'Muhlenberg', 'McLean', 'Daviess', 'Henderson', 'Webster', 'Union', 'Hopkins', 'Caldwell', 'Christian']
+GRAY_REGION_COUNTIES = ['Crittenden', 'Lyon', 'Trigg', 'Livingston', 'Marshall', 'Calloway', 'McCracken', 'Graves', 'Ballard', 'Carlisle', 'Hickman', 'Fulton']
+PINK_REGION_COUNTIES = ['Boone', 'Gallatin', 'Owen', 'Franklin', 'Anderson', 'Woodford', 'Scott', 'Grant', 'Kenton', 'Campbell', 'Pendleton', 'Harrison', 'Bourbon', 'Fayette', 'Jessamine', 'Bracken']
+BROWN_REGION_COUNTIES = ['Whitley', 'Knox', 'Laurel', 'Jackson', 'Estill', 'Madison', 'Rockcastle', 'Pulaski', 'McCreary', 'Wayne', 'Casey', 'Boyle', 'Mercer', 'Garrard', 'Lincoln']
+BLUE_REGION_COUNTIES = ['Bell', 'Clay', 'Owsley', 'Lee', 'Wolfe', 'Breathitt', 'Perry', 'Leslie', 'Harlan', 'Letcher', 'Knott', 'Magoffin', 'Johnson', 'Floyd', 'Pike', 'Martin']
+MAROON_REGION_COUNTIES = ['Powell', 'Clark', 'Montgomery', 'Nicholas', 'Robertson', 'Mason', 'Fleming', 'Bath', 'Menifee', 'Morgan', 'Rowan', 'Lewis', 'Greenup', 'Carter', 'Elliott', 'Lawrence', 'Boyd']
 
 # STRUCTURE
 class Disease_Data:
@@ -9,16 +22,20 @@ class Disease_Data:
         self.recovery = recovery       # Number of turns for an infected individual to recover
         self.mortality = mortality     # Probability of death for an infected individual
 
+
+# Enumerates different states an individual can be in, such as SUSCEPTIBLE, INFECTED, RECOVERED, and DEAD.
 class State(Enum):
     SUSCEPTIBLE = "S"
     INFECTED = "I"
     RECOVERED = "R"
     DEAD = "D"
 
+
+# Represents a geographical region with attributes like name, population, land area, and population density.
 class Region:
     def __init__(self, name, population, land_area, population_density):
         self.name = name
-        self.populaton = population
+        self.population = population
         self.land_area = land_area
         self.populaton_density = population_density
         self.susceptible_count = 0
@@ -28,18 +45,70 @@ class Region:
         self.percent_dead = 0
         self.percent_infected = 0
         self.percent_susceptible = 0
-    
+
+    # Provides a method to update percentage values based on the current counts.
     def update_percentages(self):
         if (self.population <= 0):
             raise ValueError('A population below or equal to 0 is not possible.')
-                
+
         self.percent_dead = self.dead_count / self.population
         self.percent_infected = self.infected_count / self.population
         self.percent_susceptible = self.susceptible_count / self.population
 
 
+# Main block: Reads population data from a CSV file and prints each row.
 if __name__ == '__main__':
+    red_region = Region('Outer Bluegrass', 0, 0, 0)
+    yellow_region = Region('Pennyroyal',0,0,0)
+    orange_region = Region('Western Coal Fields', 0, 0, 0)
+    pink_region = Region('Inner Blugrass',0,0,0)
+    brown_region = Region('Mississipi Pleateu',0,0,0)
+    blue_region = Region('Eastern Coal Fields',0,0,0)
+    maroon_region = Region('appalachia',0,0,0)
+    gray_region = Region('Jackson Purchase',0,0,0)
+
     with open('./Data Files/KY-Population-Data.csv', newline='') as dataFile:
-        reader = csv.reader(dataFile, delimiter= ' ', quotechar= '|')
+        reader = csv.reader(dataFile, delimiter= ',', quotechar= '|')
+        header = next(reader)
+        county_column_index = header.index("ï»¿Region")
+        population_column_index = header.index('Total Population')
+        land_area_column_index = header.index('Land Area')
+        population_density_column_index = header.index('Population Density')
+
+        # This separates the CSV into counties - just a rough start and outline of how we can parse the data
         for row in reader:
-            print(', '.join(row))
+            county = row[county_column_index]
+            if county in RED_REGION_COUNTIES:
+                red_region.population += int(row[population_column_index])
+                red_region.land_area += float(row[land_area_column_index])
+                red_region.populaton_density += float(row[population_column_index])
+            elif county in YELLOW_REGION_COUNTIES:
+                yellow_region.population += int(row[population_column_index])
+                yellow_region.land_area += float(row[land_area_column_index])
+                yellow_region.populaton_density += float(row[population_column_index])
+            elif county in ORANGE_REGION_COUNTIES:
+                orange_region.population += int(row[population_column_index])
+                orange_region.land_area += float(row[land_area_column_index])
+                orange_region.populaton_density += float(row[population_column_index])
+            elif county in PINK_REGION_COUNTIES:
+                pink_region.population += int(row[population_column_index])
+                pink_region.land_area += float(row[land_area_column_index])
+                pink_region.populaton_density += float(row[population_column_index])
+            elif county in BROWN_REGION_COUNTIES:
+                brown_region.population += int(row[population_column_index])
+                brown_region.land_area += float(row[land_area_column_index])
+                brown_region.populaton_density += float(row[population_column_index])
+            elif county in BLUE_REGION_COUNTIES:
+                blue_region.population += int(row[population_column_index])
+                blue_region.land_area += float(row[land_area_column_index])
+                blue_region.populaton_density += float(row[population_column_index])
+            elif county in MAROON_REGION_COUNTIES:
+                maroon_region.population += int(row[population_column_index])
+                maroon_region.land_area += float(row[land_area_column_index])
+                maroon_region.populaton_density += float(row[population_column_index])
+            elif county in GRAY_REGION_COUNTIES:
+                gray_region.population += int(row[population_column_index])
+                gray_region.land_area += float(row[land_area_column_index])
+                gray_region.populaton_density += float(row[population_column_index])
+    
+    All_Regions = [red_region, orange_region, yellow_region, pink_region, brown_region, blue_region, maroon_region, gray_region]
