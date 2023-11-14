@@ -13,14 +13,9 @@ from matplotlib import pyplot as plt
 import numpy as np
 import json
 
-statisticsXCoord = 10
-numInfectedYCoord = 350
-numDeadYCoord = 365
-numRecoveredYCoord = 380
-
-numInfected = 0
-numDead = 0
-numRecovered = 0
+totalInfected = 0
+totalDead = 0
+totalRecovered = 0
 
 #lightredregion = io.imread('region1.json')
 imgky = io.imread('croppednewmap.png')
@@ -35,10 +30,13 @@ plt.imshow(data)
 
 # Represents a GUI application for a drawing app.
 class DrawingApp(QMainWindow):
-    global numInfected, numDead, numRecovered
-
     def __init__(self):
         super().__init__()
+
+        statisticsXCoord = 10
+        infectedLabelYCoord = 350
+        deadLabelYCoord = 365
+        recoveredLabelYCoord = 380
 
         # Initializing widget stuff
         central_widget = QWidget(self)
@@ -69,12 +67,12 @@ class DrawingApp(QMainWindow):
         button_layout.addWidget(self.diseaseType2Button)
         button_layout.addWidget(self.diseaseType3Button)
 
-        infectedLabel = QLabel("Total Infected: " + str(numInfected), central_widget)
-        infectedLabel.move(statisticsXCoord, numInfectedYCoord)
-        deadLabel = QLabel("Total Dead: " + str(numDead), central_widget)
-        deadLabel.move(statisticsXCoord, numDeadYCoord)
-        recoveredLabel = QLabel("Total Recovered: " + str(numRecovered), central_widget)
-        recoveredLabel.move(statisticsXCoord, numRecoveredYCoord)
+        self.infectedLabel = QLabel("Total Infected: " + str(totalInfected), central_widget)
+        self.infectedLabel.move(statisticsXCoord, infectedLabelYCoord)
+        self.deadLabel = QLabel("Total Dead: " + str(totalDead), central_widget)
+        self.deadLabel.move(statisticsXCoord, deadLabelYCoord)
+        self.recoveredLabel = QLabel("Total Recovered: " + str(totalRecovered), central_widget)
+        self.recoveredLabel.move(statisticsXCoord, recoveredLabelYCoord)
 
         # Create text box for input param
         label = QLabel("Enter Disease parameters:", central_widget)
@@ -82,7 +80,6 @@ class DrawingApp(QMainWindow):
         self.text_box = QLineEdit(central_widget)
 
         layout.addLayout(button_layout)
-        #layout.addLayout(statistics_layout)
         layout.addWidget(label)
         layout.addWidget(self.text_box)
 
@@ -131,6 +128,20 @@ class DrawingApp(QMainWindow):
         Disease = Disease('scale', param, rect_width, rect_height)
         points = Disease.scale()
         self.canvas.setPoints(points)
+
+    # Update totalInfected, totalDead, and totalRecovered by passing in additional numInfected,
+    # numDead, and numRecovered. Update statistics labels with these new totals.
+    def updateStatisticsLabels(self, numInfected, numDead, numRecovered):
+        global totalInfected, totalDead, totalRecovered
+
+        totalInfected += numInfected
+        totalDead += numDead
+        totalRecovered += numRecovered
+
+        self.infectedLabel.setText("Total Infected: " + str(numInfected))
+        self.deadLabel.setText("Total Dead: " + str(numDead))
+        self.recoveredLabel.setText("Total Recovered: " + str(numRecovered))
+
 
 class CanvasWidget(QWidget):
     #Keep a list of points so that they can be updated
