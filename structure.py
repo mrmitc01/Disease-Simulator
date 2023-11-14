@@ -55,6 +55,28 @@ class Region:
         self.percent_infected = self.infected_count / self.population
         self.percent_susceptible = self.susceptible_count / self.population
 
+    # Function updates the number of infected and susceptible people based on the rates defined for the disease
+    def infect(self, infection_rate):
+        new_infections = min(self.region_stats.susceptible_count, int(self.region_stats.infected_count * infection_rate))
+        self.susceptible_count -= new_infections
+        self.infected_count += new_infections
+        return new_infections
+
+    # Function updates the number of infected and recovered people based on the rates defined for the disease
+    def recover(self, recovery_rate):
+        newly_recovered = int(self.infected_count * recovery_rate)
+        self.infected_count -= newly_recovered
+        self.recovered_count += newly_recovered
+        return newly_recovered
+
+    def die(self, mortality_rate):
+        new_deaths = int(self.infected_count * mortality_rate)
+        self.infected_count -= new_deaths
+        self.dead_count += new_deaths
+
+    def get_total_cases(self):
+        return self.infected_count + self.susceptible_count + self.recovered_count
+
 
 # Main block: Reads population data from a CSV file and prints each row.
 if __name__ == '__main__':
