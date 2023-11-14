@@ -4,6 +4,7 @@ translating, rotating, shearing, and scaling a rectangle on a canvas.
 """
 
 from Disease import *
+from structure import *
 from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
 import sys
@@ -12,6 +13,14 @@ from matplotlib import pyplot as plt
 import numpy as np
 import json
 
+statisticsXCoord = 10
+numInfectedYCoord = 350
+numDeadYCoord = 365
+numRecoveredYCoord = 380
+
+numInfected = 0
+numDead = 0
+numRecovered = 0
 
 #lightredregion = io.imread('region1.json')
 imgky = io.imread('croppednewmap.png')
@@ -26,6 +35,8 @@ plt.imshow(data)
 
 # Represents a GUI application for a drawing app.
 class DrawingApp(QMainWindow):
+    global numInfected, numDead, numRecovered
+
     def __init__(self):
         super().__init__()
 
@@ -58,12 +69,20 @@ class DrawingApp(QMainWindow):
         button_layout.addWidget(self.diseaseType2Button)
         button_layout.addWidget(self.diseaseType3Button)
 
+        infectedLabel = QLabel("Total Infected: " + str(numInfected), central_widget)
+        infectedLabel.move(statisticsXCoord, numInfectedYCoord)
+        deadLabel = QLabel("Total Dead: " + str(numDead), central_widget)
+        deadLabel.move(statisticsXCoord, numDeadYCoord)
+        recoveredLabel = QLabel("Total Recovered: " + str(numRecovered), central_widget)
+        recoveredLabel.move(statisticsXCoord, numRecoveredYCoord)
+
         # Create text box for input param
         label = QLabel("Enter Disease parameters:", central_widget)
 
         self.text_box = QLineEdit(central_widget)
 
         layout.addLayout(button_layout)
+        #layout.addLayout(statistics_layout)
         layout.addWidget(label)
         layout.addWidget(self.text_box)
 
