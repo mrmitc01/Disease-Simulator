@@ -5,7 +5,14 @@ Defines classes for diseases, regions, and statistics. Reads population data fro
 from enum import Enum
 import csv
 
-
+RED_REGION_COUNTIES = ['Trimble', 'Oldham', 'Henry', 'Carroll', 'Shelby', 'Jefferson', 'Bullitt', 'Spencer']
+YELLOW_REGION_COUNTIES = ['Meade', 'Grayson', 'Hardin', 'Larue', 'Washington', 'Marion', 'Taylor', 'Green', 'Hart', 'Edmonson', 'Breckinridge', 'Warren', 'Simpson', 'Barren', 'Allen', 'Metcalfe', 'Monroe', 'Nelson', 'Adair', 'Russell', 'Clinton', 'Cumberland']
+ORANGE_REGION_COUNTIES = ['Hancock', 'Ohio', 'Butler', 'Logan', 'Todd', 'Muhlenberg', 'McLean', 'Daviess', 'Henderson', 'Webster', 'Union', 'Hopkins', 'Caldwell', 'Christian']
+GRAY_REGION_COUNTIES = ['Crittenden', 'Lyon', 'Trigg', 'Livingston', 'Marshall', 'Calloway', 'McCracken', 'Graves', 'Ballard', 'Carlisle', 'Hickman', 'Fulton']
+PINK_REGION_COUNTIES = ['Boone', 'Gallatin', 'Owen', 'Franklin', 'Anderson', 'Woodford', 'Scott', 'Grant', 'Kenton', 'Campbell', 'Pendleton', 'Harrison', 'Bourbon', 'Fayette', 'Jessamine', 'Bracken']
+BROWN_REGION_COUNTIES = ['Whitley', 'Knox', 'Laurel', 'Jackson', 'Estill', 'Madison', 'Rockcastle', 'Pulaski', 'McCreary', 'Wayne', 'Casey', 'Boyle', 'Mercer', 'Garrard', 'Lincoln']
+BLUE_REGION_COUNTIES = ['Bell', 'Clay', 'Owsley', 'Lee', 'Wolfe', 'Breathitt', 'Perry', 'Leslie', 'Harlan', 'Letcher', 'Knott', 'Magoffin', 'Johnson', 'Floyd', 'Pike', 'Martin']
+MAROON_REGION_COUNTIES = ['Powell', 'Clark', 'Montgomery', 'Nicholas', 'Robertson', 'Mason', 'Fleming', 'Bath', 'Menifee', 'Morgan', 'Rowan', 'Lewis', 'Greenup', 'Carter', 'Elliott', 'Lawrence']
 # STRUCTURE
 
 # Represents a disease with attributes such as name, infection probability, recovery duration, and mortality
@@ -71,4 +78,5 @@ if __name__ == '__main__':
         for row in reader:
             county = row[county_column_index]
             counties.append(county)
-        print(counties)
+
+        print(len(counties))
