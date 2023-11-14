@@ -140,6 +140,9 @@ def main():
     app = QApplication(sys.argv)
     window = DrawingApp()
     window.show()
+
+    # Need to put something here to call the "engine" program that runs the simulation
+
     sys.exit(app.exec())
 
 if __name__ == "__main__":
