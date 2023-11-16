@@ -4,6 +4,7 @@ Defines classes for diseases, regions, and statistics. Reads population data fro
 
 from enum import Enum
 import csv
+import random
 
 RED_REGION_COUNTIES = ['Trimble', 'Oldham', 'Henry', 'Carroll', 'Shelby', 'Jefferson', 'Bullitt', 'Spencer']
 YELLOW_REGION_COUNTIES = ['Meade', 'Grayson', 'Hardin', 'Larue', 'Washington', 'Marion', 'Taylor', 'Green', 'Hart', 'Edmonson', 'Breckinridge', 'Warren', 'Simpson', 'Barren', 'Allen', 'Metcalfe', 'Monroe', 'Nelson', 'Adair', 'Russell', 'Clinton', 'Cumberland']
