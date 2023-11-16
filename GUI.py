@@ -1,23 +1,33 @@
+"""
+Sets up a GUI using PyQt6 for a drawing application. Loads an image and provides functionality for
+translating, rotating, shearing, and scaling a rectangle on a canvas.
+"""
+
 from Disease import *
+from PyQt6.QtGui import *
+from structure import *
 from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
 import sys
 from skimage import io, color
 from matplotlib import pyplot as plt
 import numpy as np
-import json
 
 #lightredregion = io.imread('region1.json')
 imgky = io.imread('croppednewmap.png')
 image = color.rgba2rgb(imgky)
 
-plt.figure(figsize=(8, 8))
-
+# Represents a GUI application for a drawing app.
 class DrawingApp(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        #Initializing widget stuff
+        statisticsXCoord = 10
+        infectedLabelYCoord = 350
+        deadLabelYCoord = 365
+        recoveredLabelYCoord = 380
+
+        # Initializing widget stuff
         central_widget = QWidget(self)
         self.setCentralWidget(central_widget)
 
@@ -31,22 +41,32 @@ class DrawingApp(QMainWindow):
         #Create buttons with their functions
         self.runButton = QPushButton("Run", central_widget)
         self.runButton.clicked.connect(self.run)
+        # Create buttons with their functions
+        self.diseaseType0Button = QPushButton("DiseaseType0", central_widget)
+        # self.translate_button.clicked.connect(self.translation)
 
         self.diseaseType1Button = QPushButton("DiseaseType1", central_widget)
-        #self.rotate_button.clicked.connect(self.rotation)
+        # self.rotate_button.clicked.connect(self.rotation)
 
         self.diseaseType2Button = QPushButton("DiseaseType3", central_widget)
-        #self.shear_button.clicked.connect(self.shear)
+        # self.shear_button.clicked.connect(self.shear)
 
         self.diseaseType3Button = QPushButton("DiseaseType4", central_widget)
-        #self.scale_button.clicked.connect(self.scale)
+        # self.scale_button.clicked.connect(self.scale)
 
         #button_layout.addWidget(self.diseaseType0Button)
         button_layout.addWidget(self.diseaseType1Button)
         button_layout.addWidget(self.diseaseType2Button)
         button_layout.addWidget(self.diseaseType3Button)
 
-        #Create text box for input param
+        self.infectedLabel = QLabel("Total Infected: " + str(totalInfected), central_widget)
+        self.infectedLabel.move(statisticsXCoord, infectedLabelYCoord)
+        self.deadLabel = QLabel("Total Dead: " + str(totalDead), central_widget)
+        self.deadLabel.move(statisticsXCoord, deadLabelYCoord)
+        self.recoveredLabel = QLabel("Total Recovered: " + str(totalRecovered), central_widget)
+        self.recoveredLabel.move(statisticsXCoord, recoveredLabelYCoord)
+
+        # Create text box for input param
         label = QLabel("Enter Disease parameters:", central_widget)
 
         self.text_box = QLineEdit(central_widget)
