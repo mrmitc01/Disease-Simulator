@@ -1,3 +1,5 @@
+import random
+
 def run_simulation(self, regions, disease_stats, num_days):
     # Load in the data from each region
 
@@ -5,6 +7,12 @@ def run_simulation(self, regions, disease_stats, num_days):
     infection_rate = disease_stats.infection
     recovery_rate = disease_stats.recovery
     mortality_rate = disease_stats.mortality
+
+    # Start the infection in a random region
+    def start_infection(self):
+        start_region = random.choice(regions)
+        start_region.infected_count += 1
+
 
     # Iterate through each "day" in the simulation
     for day in range(1, num_days):
