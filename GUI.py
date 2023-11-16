@@ -29,6 +29,7 @@ class KentuckyViewer(QMainWindow):
         self.setCentralWidget(self.central_widget)
 
         self.layout = QVBoxLayout()
+        self.layout = QVBoxLayout()
 
         self.canvas_label = QLabel(self)
         self.layout.addWidget(self.canvas_label)
