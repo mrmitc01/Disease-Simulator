@@ -5,6 +5,7 @@ Defines classes for diseases, regions, and statistics. Reads population data fro
 import random
 from enum import Enum
 import csv
+import random
 import matplotlib.pyplot as plt
 import numpy as np
 
