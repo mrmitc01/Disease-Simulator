@@ -25,6 +25,12 @@ class KentuckyViewer(QMainWindow):
         self.initUI()
 
     def initUI(self):
+        statisticsXCoord = 20
+        infectedLabelYCoord = 40
+        deadLabelYCoord = 60
+        recoveredLabelYCoord = 80
+        colorStyle = "color: white; background-color: black"
+
         self.central_widget = QWidget(self)
         self.setCentralWidget(self.central_widget)
 
@@ -48,10 +54,20 @@ class KentuckyViewer(QMainWindow):
 
         self.central_widget.setLayout(self.layout)
 
-        self.setGeometry(100, 100, 800, 600)
+        self.setGeometry(100, 100, 1000, 600)
         self.setWindowTitle('Kentucky Map Viewer')
 
         self.update_canvas()
+
+        self.infectedLabel = QLabel("Total Infected: " + str(totalInfected), self.central_widget)
+        self.infectedLabel.move(statisticsXCoord, infectedLabelYCoord)
+        self.infectedLabel.setStyleSheet(colorStyle)
+        self.deadLabel = QLabel("Total Dead: " + str(totalDead), self.central_widget)
+        self.deadLabel.move(statisticsXCoord, deadLabelYCoord)
+        self.deadLabel.setStyleSheet(colorStyle)
+        self.recoveredLabel = QLabel("Total Recovered: " + str(totalRecovered), self.central_widget)
+        self.recoveredLabel.move(statisticsXCoord, recoveredLabelYCoord)
+        self.recoveredLabel.setStyleSheet(colorStyle)
 
     def update_color(self, region_index):
         # Update the color of the specific region dynamically
@@ -72,6 +88,19 @@ class KentuckyViewer(QMainWindow):
         io.imsave('combined_kentucky.png', composite_image)
         pixmap = QPixmap('combined_kentucky.png')
         self.canvas_label.setPixmap(pixmap)
+
+    # Update totalInfected, totalDead, and totalRecovered by passing in additional numInfected,
+    # numDead, and numRecovered. Update statistics labels with these new totals.
+    def updateStatisticsLabels(self, numInfected, numDead, numRecovered):
+        global totalInfected, totalDead, totalRecovered
+
+        totalInfected += numInfected
+        totalDead += numDead
+        totalRecovered += numRecovered
+
+        self.infectedLabel.setText("Total Infected: " + str(numInfected))
+        self.deadLabel.setText("Total Dead: " + str(numDead))
+        self.recoveredLabel.setText("Total Recovered: " + str(numRecovered))
 
 # Creates an instance of the DrawingApp class, shows the main window, and starts the application loop.
 def main():
