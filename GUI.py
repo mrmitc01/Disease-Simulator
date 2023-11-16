@@ -4,7 +4,6 @@ translating, rotating, shearing, and scaling a rectangle on a canvas.
 """
 
 from Disease import *
-from PyQt6.QtGui import *
 from structure import *
 from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
@@ -12,6 +11,10 @@ import sys
 from skimage import io, color
 from matplotlib import pyplot as plt
 import numpy as np
+
+totalInfected = 0
+totalDead = 0
+totalRecovered = 0
 
 #lightredregion = io.imread('region1.json')
 imgky = io.imread('croppednewmap.png')
@@ -38,9 +41,6 @@ class DrawingApp(QMainWindow):
 
         button_layout = QHBoxLayout()
 
-        #Create buttons with their functions
-        self.runButton = QPushButton("Run", central_widget)
-        self.runButton.clicked.connect(self.run)
         # Create buttons with their functions
         self.diseaseType0Button = QPushButton("DiseaseType0", central_widget)
         # self.translate_button.clicked.connect(self.translation)
@@ -79,8 +79,6 @@ class DrawingApp(QMainWindow):
         self.setGeometry(100, 100, 600, 600)
 
 
-    #Define what you want buttons to do
-    def run(self):
         text = self.text_box.text()
         if text:
             param = int(text)
@@ -88,44 +86,49 @@ class DrawingApp(QMainWindow):
             param = 0
         self.canvas.turnRed(self, region2, param)
 
+    # Update totalInfected, totalDead, and totalRecovered by passing in additional numInfected,
+    # numDead, and numRecovered. Update statistics labels with these new totals.
+    def updateStatisticsLabels(self, numInfected, numDead, numRecovered):
+        global totalInfected, totalDead, totalRecovered
+
+        totalInfected += numInfected
+        totalDead += numDead
+        totalRecovered += numRecovered
+
+        self.infectedLabel.setText("Total Infected: " + str(numInfected))
+        self.deadLabel.setText("Total Dead: " + str(numDead))
+        self.recoveredLabel.setText("Total Recovered: " + str(numRecovered))
+
+
 class CanvasWidget(QWidget):
     def __init__(self, parent):
         super().__init__(parent)
         self.rect_drawn = False
         self.points = []
 
-    def turnRed(self, region, param):
-        self.region = region
-        for i in param:
-            for row in region:
-                for pixel in row:
-                    if np.allclose(pixel, [1,1,1]):
-                        pixel[1] = 0
-                        pixel[2] = 0
-                        pixel[0] = pixel[0] + 0.1
-                        plt.imshow(region)
-                        plt.show()
-                        self.update()
 
+    # Overrides the paintEvent method to handle the drawing on the canvas.
     def paintEvent(self, event):
         if self.rect_drawn:
-            #After a button is clicked
+            # After a button is clicked
             painter = QPainter(self)
-            pixmap = QPixmap("region_2.png")
-            painter.drawPixmap(self.rect(), pixmap)
-
         else:
-            #Before a button is clicked
+            # Before a button is clicked
             painter = QPainter(self)
             pixmap = QPixmap("out_put_regions\\region_2.png")
             painter.drawPixmap(self.rect(), pixmap)
-            
 
+
+# Creates an instance of the DrawingApp class, shows the main window, and starts the application loop.
 def main():
     app = QApplication(sys.argv)
     window = DrawingApp()
     window.show()
+
+    # Need to put something here to call the "engine" program that runs the simulation
+
     sys.exit(app.exec())
+
 
 if __name__ == "__main__":
     main()
