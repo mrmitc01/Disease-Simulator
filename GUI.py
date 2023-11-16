@@ -1,5 +1,5 @@
 from Disease import *
-from PyQt6.QtGui     import *
+from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
 import sys
 from skimage import io, color
@@ -11,11 +11,7 @@ import json
 imgky = io.imread('croppednewmap.png')
 image = color.rgba2rgb(imgky)
 
-with open('region1.json', "r") as json_file:
-    data = json.load(json_file)
-
-plt.imshow(data)
-plt.show()
+plt.figure(figsize=(8, 8))
 
 class DrawingApp(QMainWindow):
     def __init__(self):
@@ -33,8 +29,8 @@ class DrawingApp(QMainWindow):
         button_layout = QHBoxLayout()
 
         #Create buttons with their functions
-        self.diseaseType0Button = QPushButton("DiseaseType0", central_widget)
-        #self.translate_button.clicked.connect(self.translation)
+        self.runButton = QPushButton("Run", central_widget)
+        self.runButton.clicked.connect(self.run)
 
         self.diseaseType1Button = QPushButton("DiseaseType1", central_widget)
         #self.rotate_button.clicked.connect(self.rotation)
@@ -45,7 +41,7 @@ class DrawingApp(QMainWindow):
         self.diseaseType3Button = QPushButton("DiseaseType4", central_widget)
         #self.scale_button.clicked.connect(self.scale)
 
-        button_layout.addWidget(self.diseaseType0Button)
+        #button_layout.addWidget(self.diseaseType0Button)
         button_layout.addWidget(self.diseaseType1Button)
         button_layout.addWidget(self.diseaseType2Button)
         button_layout.addWidget(self.diseaseType3Button)
@@ -54,8 +50,8 @@ class DrawingApp(QMainWindow):
         label = QLabel("Enter Disease parameters:", central_widget)
 
         self.text_box = QLineEdit(central_widget)
-
         layout.addLayout(button_layout)
+
         layout.addWidget(label)
         layout.addWidget(self.text_box)
 
@@ -64,58 +60,13 @@ class DrawingApp(QMainWindow):
 
 
     #Define what you want buttons to do
-    def translation(self):
+    def run(self):
         text = self.text_box.text()
         if text:
             param = int(text)
         else:
             param = 0
-        disease = Disease('translation', param, rect_width, rect_height)
-        points = disease.translate()
-        self.canvas.setPoints(points)
-
-    def rotation(self):
-        text = self.text_box.text()
-        if text:
-            param = int(text)
-        else:
-            param = 0
-        Disease = Disease('rotation', param, rect_width, rect_height)
-        points = Disease.rotate()
-        self.canvas.setPoints(points)
-
-    def shear(self):
-        text = self.text_box.text()
-        if text:
-            param = int(text)
-        else:
-            param = 0
-        Disease = Disease('shear', param, rect_width, rect_height)
-        points = Disease.shear()
-        self.canvas.setPoints(points)
-
-    def scale(self):
-        text = self.text_box.text()
-        if text:
-            param = int(text)
-        else:
-            param = 0
-        Disease = Disease('scale', param, rect_width, rect_height)
-        points = Disease.scale()
-        self.canvas.setPoints(points)
-
-class CanvasWidget(QWidget):
-    #Keep a list of points so that they can be updated
-    def __init__(self, parent):
-        super().__init__(parent)
-        self.rect_drawn = False
-        self.points = []
-
-    #Send points to be drawn
-    def setPoints(self, points):
-        self.points = points
-        self.rect_drawn = True
-        self.update()
+        self.canvas.turnRed(self, region2, param)
 
 class CanvasWidget(QWidget):
     def __init__(self, parent):
@@ -123,20 +74,30 @@ class CanvasWidget(QWidget):
         self.rect_drawn = False
         self.points = []
 
-    def setPoints(self, points):
-        self.points = points
-        self.rect_drawn = True
-        self.update()
+    def turnRed(self, region, param):
+        self.region = region
+        for i in param:
+            for row in region:
+                for pixel in row:
+                    if np.allclose(pixel, [1,1,1]):
+                        pixel[1] = 0
+                        pixel[2] = 0
+                        pixel[0] = pixel[0] + 0.1
+                        plt.imshow(region)
+                        plt.show()
+                        self.update()
 
     def paintEvent(self, event):
         if self.rect_drawn:
             #After a button is clicked
             painter = QPainter(self)
+            pixmap = QPixmap("region_2.png")
+            painter.drawPixmap(self.rect(), pixmap)
 
         else:
             #Before a button is clicked
             painter = QPainter(self)
-            pixmap = QPixmap("croppednewmap.png")
+            pixmap = QPixmap("out_put_regions\\region_2.png")
             painter.drawPixmap(self.rect(), pixmap)
             
 
