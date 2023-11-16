@@ -11,7 +11,6 @@ import sys
 from skimage import io, color
 from matplotlib import pyplot as plt
 import numpy as np
-import json
 
 totalInfected = 0
 totalDead = 0
@@ -20,13 +19,6 @@ totalRecovered = 0
 #lightredregion = io.imread('region1.json')
 imgky = io.imread('croppednewmap.png')
 image = color.rgba2rgb(imgky)
-
-with open('region1.json', "r") as json_file:
-    data = json.load(json_file)
-
-plt.imshow(data)
-
-
 
 # Represents a GUI application for a drawing app.
 class DrawingApp(QMainWindow):
@@ -62,7 +54,7 @@ class DrawingApp(QMainWindow):
         self.diseaseType3Button = QPushButton("DiseaseType4", central_widget)
         # self.scale_button.clicked.connect(self.scale)
 
-        button_layout.addWidget(self.diseaseType0Button)
+        #button_layout.addWidget(self.diseaseType0Button)
         button_layout.addWidget(self.diseaseType1Button)
         button_layout.addWidget(self.diseaseType2Button)
         button_layout.addWidget(self.diseaseType3Button)
@@ -78,8 +70,8 @@ class DrawingApp(QMainWindow):
         label = QLabel("Enter Disease parameters:", central_widget)
 
         self.text_box = QLineEdit(central_widget)
-
         layout.addLayout(button_layout)
+
         layout.addWidget(label)
         layout.addWidget(self.text_box)
 
@@ -87,47 +79,12 @@ class DrawingApp(QMainWindow):
         self.setGeometry(100, 100, 600, 600)
 
 
-    # Provides methods for handling button clicks to perform translation, rotation, shear, and scale transformations.
-
-    def translation(self):
         text = self.text_box.text()
         if text:
             param = int(text)
         else:
             param = 0
-        disease = Disease('translation', param, rect_width, rect_height)
-        points = disease.translate()
-        self.canvas.setPoints(points)
-
-    def rotation(self):
-        text = self.text_box.text()
-        if text:
-            param = int(text)
-        else:
-            param = 0
-        Disease = Disease('rotation', param, rect_width, rect_height)
-        points = Disease.rotate()
-        self.canvas.setPoints(points)
-
-    def shear(self):
-        text = self.text_box.text()
-        if text:
-            param = int(text)
-        else:
-            param = 0
-        Disease = Disease('shear', param, rect_width, rect_height)
-        points = Disease.shear()
-        self.canvas.setPoints(points)
-
-    def scale(self):
-        text = self.text_box.text()
-        if text:
-            param = int(text)
-        else:
-            param = 0
-        Disease = Disease('scale', param, rect_width, rect_height)
-        points = Disease.scale()
-        self.canvas.setPoints(points)
+        self.canvas.turnRed(self, region2, param)
 
     # Update totalInfected, totalDead, and totalRecovered by passing in additional numInfected,
     # numDead, and numRecovered. Update statistics labels with these new totals.
@@ -144,30 +101,11 @@ class DrawingApp(QMainWindow):
 
 
 class CanvasWidget(QWidget):
-    #Keep a list of points so that they can be updated
     def __init__(self, parent):
         super().__init__(parent)
         self.rect_drawn = False
         self.points = []
 
-    #Send points to be drawn
-    def setPoints(self, points):
-        self.points = points
-        self.rect_drawn = True
-        self.update()
-
-# Represents a canvas where drawings can be displayed.
-class CanvasWidget(QWidget):
-    def __init__(self, parent):
-        super().__init__(parent)
-        self.rect_drawn = False
-        self.points = []
-
-    # Provides a method to set and update points to be drawn.
-    def setPoints(self, points):
-        self.points = points
-        self.rect_drawn = True
-        self.update()
 
     # Overrides the paintEvent method to handle the drawing on the canvas.
     def paintEvent(self, event):
@@ -177,7 +115,7 @@ class CanvasWidget(QWidget):
         else:
             # Before a button is clicked
             painter = QPainter(self)
-            pixmap = QPixmap("croppednewmap.png")
+            pixmap = QPixmap("out_put_regions\\region_2.png")
             painter.drawPixmap(self.rect(), pixmap)
 
 
