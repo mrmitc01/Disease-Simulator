@@ -239,14 +239,14 @@ def main():
 
     # Replace the following with the actual paths to your segment images
     segment_paths = [
-        'Disease-Simulator/output_regions/region_2.png',
-        'Disease-Simulator/output_regions/region_3.png',
-        'Disease-Simulator/output_regions/region_4.png',
-        'Disease-Simulator/output_regions/region_5.png',
-        'Disease-Simulator/output_regions/region_6.png',
-        'Disease-Simulator/output_regions/region_7.png',
-        'Disease-Simulator/output_regions/region_8.png',
-        'Disease-Simulator/output_regions/region_9.png'
+        'output_regions/region_2.png',
+        'output_regions/region_3.png',
+        'output_regions/region_4.png',
+        'output_regions/region_5.png',
+        'output_regions/region_6.png',
+        'output_regions/region_7.png',
+        'output_regions/region_8.png',
+        'output_regions/region_9.png'
     ]
 
     viewer = ImageViewer(segment_paths)
