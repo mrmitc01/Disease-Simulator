@@ -91,24 +91,30 @@ class ImageViewer(QMainWindow):
         mortality_percentage = self.mortality_percentages[index] / 100
 
         # Calculate colors based on percentages
-        infection_color = QColor(255, int(255 * (1 - infection_percentage)), int(255 * (1 - infection_percentage)))
-        immunity_color = QColor(int(255 * immunity_percentage), int(255 * immunity_percentage), 255)
-        mortality_color = QColor(int(255 * (1 - mortality_percentage)), int(255 * (1 - mortality_percentage)),
-                                int(255 * (1 - mortality_percentage)))
+        infection_color = (255, 0, 0)
+        immunity_color = (0, 0, 255)
+        mortality_color = (0, 0, 0)
 
-        # Combine the colors based on the percentages
-        final_color = QColor(
-            int(original_color[0] * (1 - infection_percentage) * (1 - mortality_percentage) + infection_color.red() * (1 - mortality_percentage)),
-            int(original_color[1] * (1 - infection_percentage) * (1 - mortality_percentage) + infection_color.green() * (1 - mortality_percentage)),
-            int(original_color[2] * (1 - infection_percentage) * (1 - mortality_percentage) + infection_color.blue() * (1 - mortality_percentage)),
+        # Adjust the colors based on percentages
+        final_color = (
+            int(original_color[0] + (infection_color[0] - original_color[0]) * infection_percentage),
+            int(original_color[1] + (infection_color[1] - original_color[1]) * infection_percentage),
+            int(original_color[2] + (infection_color[2] - original_color[2]) * infection_percentage),
             original_color[3]
         )
 
-        final_color = QColor(
-            int(final_color.red() * (1 - immunity_percentage) + immunity_color.red() * immunity_percentage),
-            int(final_color.green() * (1 - immunity_percentage) + immunity_color.green() * immunity_percentage),
-            int(final_color.blue() * (1 - immunity_percentage) + immunity_color.blue() * immunity_percentage),
-            original_color[3]  # Preserve the original alpha value
+        final_color = (
+            int(final_color[0] + (immunity_color[0] - final_color[0]) * immunity_percentage),
+            int(final_color[1] + (immunity_color[1] - final_color[1]) * immunity_percentage),
+            int(final_color[2] + (immunity_color[2] - final_color[2]) * immunity_percentage),
+            final_color[3]
+        )
+
+        final_color = (
+            int(final_color[0] + (mortality_color[0] - final_color[0]) * mortality_percentage),
+            int(final_color[1] + (mortality_color[1] - final_color[1]) * mortality_percentage),
+            int(final_color[2] + (mortality_color[2] - final_color[2]) * mortality_percentage),
+            final_color[3]
         )
 
         # Update the segment image
@@ -118,13 +124,13 @@ class ImageViewer(QMainWindow):
                 r, g, b, a = image.getpixel((x, y))
                 if a > 0:
                     # Blend the original color with the final color based on the alpha value
-                    blended_color = QColor(
-                        int(r + (final_color.red() - r) * (a / 255)),
-                        int(g + (final_color.green() - g) * (a / 255)),
-                        int(b + (final_color.blue() - b) * (a / 255)),
+                    blended_color = (
+                        int(r + (final_color[0] - r) * (a / 255)),
+                        int(g + (final_color[1] - g) * (a / 255)),
+                        int(b + (final_color[2] - b) * (a / 255)),
                         a
                     )
-                    image.putpixel((x, y), blended_color.getRgb())
+                    image.putpixel((x, y), blended_color)
 
         # Update the segment image
         self.segment_images[index] = image
@@ -132,8 +138,7 @@ class ImageViewer(QMainWindow):
         # Redraw the entire composite image
         self.redraw_all_segments()
 
-    # Update totalInfected, totalDead, and totalRecovered by passing in additional numInfected,
-    # numDead, and numRecovered. Update statistics labels with these new totals.
+
     def updateStatisticsLabels(self, numInfected, numDead, numRecovered):
         global totalInfected, totalDead, totalRecovered
     
