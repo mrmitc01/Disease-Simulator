@@ -19,11 +19,6 @@ BROWN_REGION_COUNTIES = ['Whitley', 'Knox', 'Laurel', 'Jackson', 'Estill', 'Madi
 BLUE_REGION_COUNTIES = ['Bell', 'Clay', 'Owsley', 'Lee', 'Wolfe', 'Breathitt', 'Perry', 'Leslie', 'Harlan', 'Letcher', 'Knott', 'Magoffin', 'Johnson', 'Floyd', 'Pike', 'Martin']
 MAROON_REGION_COUNTIES = ['Powell', 'Clark', 'Montgomery', 'Nicholas', 'Robertson', 'Mason', 'Fleming', 'Bath', 'Menifee', 'Morgan', 'Rowan', 'Lewis', 'Greenup', 'Carter', 'Elliott', 'Lawrence', 'Boyd']
 
-# DISEASES
-COVID = Disease(name="Covid-19", infection=0.2025, recovery=14, mortality=0.027)
-MEASLES = Disease(name="Measles", infection=0.6329, recovery=7, mortality=0.0001)
-FLU = Disease(name="Generic flu", infection=0.0759, recovery=10, mortality=0.0001)
-EBOLA = Disease(name="Ebola", infection=0.0886, recovery=30, mortality=0.60)
 
 # STRUCTURE
 class Disease:
@@ -137,6 +132,12 @@ def start_infection(regions):
     start_region.infected_count += 1
     print(f"Initial infection started in {start_region.name}")
 
+# DISEASES
+COVID = Disease(name="Covid-19", infection=0.2025, recovery=14, mortality=0.027)
+MEASLES = Disease(name="Measles", infection=0.6329, recovery=7, mortality=0.0001)
+FLU = Disease(name="Generic flu", infection=0.0759, recovery=10, mortality=0.0001)
+EBOLA = Disease(name="Ebola", infection=0.0886, recovery=30, mortality=0.60)
+
 # Main block: Reads population data from a CSV file and prints each row.
 if __name__ == '__main__':
     red_region = Region('Outer Bluegrass', 0, 0, 0)
@@ -147,8 +148,6 @@ if __name__ == '__main__':
     blue_region = Region('Eastern Coal Fields',0,0,0)
     maroon_region = Region('Appalachia',0,0,0)
     gray_region = Region('Jackson Purchase',0,0,0)
-
-    covid_19 = Disease('Covid-19', 0.001, 0.05, 0.5)
 
     with open('./Data Files/KY-Population-Data.csv', newline='') as dataFile:
         reader = csv.reader(dataFile, delimiter= ',', quotechar= '|')
@@ -203,4 +202,4 @@ if __name__ == '__main__':
                 gray_region.populaton_density += float(row[population_column_index])
 
     All_Regions = [red_region, orange_region, yellow_region, pink_region, brown_region, blue_region, maroon_region, gray_region]
-    run_simulation(All_Regions, covid_19, 10)
+    run_simulation(All_Regions, COVID, 10)
