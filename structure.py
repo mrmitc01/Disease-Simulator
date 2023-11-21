@@ -9,6 +9,7 @@ import random
 import matplotlib.pyplot as plt
 import numpy as np
 
+# REGIONS
 RED_REGION_COUNTIES = ['Trimble', 'Oldham', 'Henry', 'Carroll', 'Shelby', 'Jefferson', 'Bullitt', 'Spencer']
 YELLOW_REGION_COUNTIES = ['Meade', 'Grayson', 'Hardin', 'Larue', 'Washington', 'Marion', 'Taylor', 'Green', 'Hart', 'Edmonson', 'Breckinridge', 'Warren', 'Simpson', 'Barren', 'Allen', 'Metcalfe', 'Monroe', 'Nelson', 'Adair', 'Russell', 'Clinton', 'Cumberland']
 ORANGE_REGION_COUNTIES = ['Hancock', 'Ohio', 'Butler', 'Logan', 'Todd', 'Muhlenberg', 'McLean', 'Daviess', 'Henderson', 'Webster', 'Union', 'Hopkins', 'Caldwell', 'Christian']
@@ -18,9 +19,14 @@ BROWN_REGION_COUNTIES = ['Whitley', 'Knox', 'Laurel', 'Jackson', 'Estill', 'Madi
 BLUE_REGION_COUNTIES = ['Bell', 'Clay', 'Owsley', 'Lee', 'Wolfe', 'Breathitt', 'Perry', 'Leslie', 'Harlan', 'Letcher', 'Knott', 'Magoffin', 'Johnson', 'Floyd', 'Pike', 'Martin']
 MAROON_REGION_COUNTIES = ['Powell', 'Clark', 'Montgomery', 'Nicholas', 'Robertson', 'Mason', 'Fleming', 'Bath', 'Menifee', 'Morgan', 'Rowan', 'Lewis', 'Greenup', 'Carter', 'Elliott', 'Lawrence', 'Boyd']
 
+# DISEASES
+COVID = Disease(name="Covid-19", infection=0.2025, recovery=14, mortality=0.027)
+MEASLES = Disease(name="Measles", infection=0.6329, recovery=7, mortality=0.0001)
+FLU = Disease(name="Generic flu", infection=0.0759, recovery=10, mortality=0.0001)
+EBOLA = Disease(name="Ebola", infection=0.0886, recovery=30, mortality=0.60)
 
 # STRUCTURE
-class Disease_Data:
+class Disease:
     def __init__(self, name, infection, recovery, mortality):
         self.name = name               # Disease name
         self.infection = infection     # Probability of infection when adjacent to an infected individual
@@ -142,7 +148,7 @@ if __name__ == '__main__':
     maroon_region = Region('Appalachia',0,0,0)
     gray_region = Region('Jackson Purchase',0,0,0)
 
-    covid_19 = Disease_Data('Covid-19', 0.001, 0.05, 0.5)
+    covid_19 = Disease('Covid-19', 0.001, 0.05, 0.5)
 
     with open('./Data Files/KY-Population-Data.csv', newline='') as dataFile:
         reader = csv.reader(dataFile, delimiter= ',', quotechar= '|')
