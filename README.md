@@ -1,5 +1,10 @@
 # Disease-Simulator
 
+## To do
+### Run, stop, reset simulation buttons - we believe the run button is the key to making everything else work
+### Disease selection dropdown
+### Put statistics in GUI so that the colors change and put statistics on screen (connect backend to frontend)
+
 ## Overview
 
 Welcome to the Disease Spread Simulation project! This repository contains a Python-based simulation and visualization tool designed to model the transmission of diseases within various geographical regions. The system incorporates multiple components, each contributing to an interactive graphical user interface (GUI) that enables users to explore and comprehend the dynamics of disease spread.
