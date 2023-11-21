@@ -1,131 +1,170 @@
-"""
-Sets up a GUI using PyQt6 for a drawing application. Loads an image and provides functionality for
-translating, rotating, shearing, and scaling a rectangle on a canvas.
-"""
-
-from Disease import *
-from PyQt6.QtGui import *
-from structure import *
-from PyQt6.QtGui import *
-from PyQt6.QtWidgets import *
+from PyQt6.QtWidgets import QApplication, QLabel, QMainWindow, QVBoxLayout, QWidget, QPushButton, QComboBox, QLineEdit
+from PyQt6.QtGui import QPixmap, QImage, QColor
 import sys
-from skimage import io, color
-from matplotlib import pyplot as plt
-import numpy as np
+from PIL import Image, ImageQt
 
-#lightredregion = io.imread('region1.json')
-imgky = io.imread('croppednewmap.png')
-image = color.rgba2rgb(imgky)
-
-# Represents a GUI application for a drawing app.
-class DrawingApp(QMainWindow):
-    def __init__(self):
+class ImageViewer(QMainWindow):
+    def __init__(self, segment_paths):
         super().__init__()
 
-        statisticsXCoord = 10
-        infectedLabelYCoord = 350
-        deadLabelYCoord = 365
-        recoveredLabelYCoord = 380
+        self.segment_paths = segment_paths
+        self.segment_images = [Image.open(path) for path in segment_paths]
+        self.infection_percentages = [0.0] * len(segment_paths)
+        self.immunity_percentages = [0.0] * len(segment_paths)
+        self.mortality_percentages = [0.0] * len(segment_paths)
+        self.original_colors = [image.getpixel((0, 0)) for image in self.segment_images]
 
-        # Initializing widget stuff
-        central_widget = QWidget(self)
-        self.setCentralWidget(central_widget)
+        self.central_widget = QWidget(self)
+        self.setCentralWidget(self.central_widget)
 
-        layout = QVBoxLayout()
+        self.layout = QVBoxLayout()
 
-        self.canvas = CanvasWidget(central_widget)
-        layout.addWidget(self.canvas)
+        self.input_layout = QVBoxLayout()
 
-        button_layout = QHBoxLayout()
+        # Dropdown for region selection
+        self.region_dropdown = QComboBox(self)
+        self.region_dropdown.addItems([f"Region {i+2}" for i in range(len(segment_paths))])
+        self.input_layout.addWidget(self.region_dropdown)
 
-        #Create buttons with their functions
-        self.runButton = QPushButton("Run", central_widget)
-        self.runButton.clicked.connect(self.run)
-        # Create buttons with their functions
-        self.diseaseType0Button = QPushButton("DiseaseType0", central_widget)
-        # self.translate_button.clicked.connect(self.translation)
+        # LineEdits for percentage inputs
+        self.infection_input = QLineEdit(self)
+        self.infection_input.setPlaceholderText("Enter Infection Percentage (0-100)")
+        self.input_layout.addWidget(self.infection_input)
 
-        self.diseaseType1Button = QPushButton("DiseaseType1", central_widget)
-        # self.rotate_button.clicked.connect(self.rotation)
+        self.immunity_input = QLineEdit(self)
+        self.immunity_input.setPlaceholderText("Enter Immunity Percentage (0-100)")
+        self.input_layout.addWidget(self.immunity_input)
 
-        self.diseaseType2Button = QPushButton("DiseaseType3", central_widget)
-        # self.shear_button.clicked.connect(self.shear)
+        self.mortality_input = QLineEdit(self)
+        self.mortality_input.setPlaceholderText("Enter Mortality Percentage (0-100)")
+        self.input_layout.addWidget(self.mortality_input)
 
-        self.diseaseType3Button = QPushButton("DiseaseType4", central_widget)
-        # self.scale_button.clicked.connect(self.scale)
+        # Button to apply changes
+        apply_button = QPushButton("Apply Changes", self)
+        apply_button.clicked.connect(self.apply_changes)
+        self.input_layout.addWidget(apply_button)
 
-        #button_layout.addWidget(self.diseaseType0Button)
-        button_layout.addWidget(self.diseaseType1Button)
-        button_layout.addWidget(self.diseaseType2Button)
-        button_layout.addWidget(self.diseaseType3Button)
+        self.layout.addLayout(self.input_layout)
 
-        self.infectedLabel = QLabel("Total Infected: " + str(totalInfected), central_widget)
-        self.infectedLabel.move(statisticsXCoord, infectedLabelYCoord)
-        self.deadLabel = QLabel("Total Dead: " + str(totalDead), central_widget)
-        self.deadLabel.move(statisticsXCoord, deadLabelYCoord)
-        self.recoveredLabel = QLabel("Total Recovered: " + str(totalRecovered), central_widget)
-        self.recoveredLabel.move(statisticsXCoord, recoveredLabelYCoord)
+        self.combined_label = QLabel(self)
+        self.layout.addWidget(self.combined_label)
 
-        # Create text box for input param
-        label = QLabel("Enter Disease parameters:", central_widget)
+        self.central_widget.setLayout(self.layout)
 
-        self.text_box = QLineEdit(central_widget)
-        layout.addLayout(button_layout)
+        self.setWindowTitle('Disease Simulation')
+        self.redraw_all_segments()
 
-        layout.addWidget(label)
-        layout.addWidget(self.text_box)
+    def apply_changes(self):
+        # Get selected region and percentage inputs
+        selected_region_index = self.region_dropdown.currentIndex()
+        infection_text = self.infection_input.text()
+        immunity_text = self.immunity_input.text()
+        mortality_text = self.mortality_input.text()
 
-        central_widget.setLayout(layout)
-        self.setGeometry(100, 100, 600, 600)
+        try:
+            # Convert percentages to float
+            infection_percentage = float(infection_text)
+            immunity_percentage = float(immunity_text)
+            mortality_percentage = float(mortality_text)
+
+            # Validate percentages
+            if 0 <= infection_percentage <= 100 and 0 <= immunity_percentage <= 100 and 0 <= mortality_percentage <= 100:
+                # Update the percentages for the selected region
+                self.infection_percentages[selected_region_index] = infection_percentage
+                self.immunity_percentages[selected_region_index] = immunity_percentage
+                self.mortality_percentages[selected_region_index] = mortality_percentage
+
+                # Update the label with the modified image
+                self.update_color(selected_region_index)
+            else:
+                print("Percentages must be between 0 and 100.")
+        except ValueError:
+            print("Invalid percentage. Please enter a number between 0 and 100.")
+
+    def update_color(self, index):
+        # Get the original color of the segment
+        original_color = self.original_colors[index]
+
+        # Calculate the color based on infection, immunity, and mortality percentages
+        infection_percentage = self.infection_percentages[index] / 100
+        immunity_percentage = self.immunity_percentages[index] / 100
+        mortality_percentage = self.mortality_percentages[index] / 100
+
+        # Calculate colors based on percentages
+        infection_color = QColor(255, int(255 * (1 - infection_percentage)), int(255 * (1 - infection_percentage)))
+        immunity_color = QColor(int(255 * immunity_percentage), int(255 * immunity_percentage), 255)
+        mortality_color = QColor(int(255 * (1 - mortality_percentage)), int(255 * (1 - mortality_percentage)),
+                                int(255 * (1 - mortality_percentage)))
+
+        # Combine the colors based on the percentages
+        final_color = QColor(
+            int(original_color[0] * (1 - infection_percentage) * (1 - mortality_percentage) + infection_color.red() * (1 - mortality_percentage)),
+            int(original_color[1] * (1 - infection_percentage) * (1 - mortality_percentage) + infection_color.green() * (1 - mortality_percentage)),
+            int(original_color[2] * (1 - infection_percentage) * (1 - mortality_percentage) + infection_color.blue() * (1 - mortality_percentage)),
+            original_color[3]
+        )
+
+        final_color = QColor(
+            int(final_color.red() * (1 - immunity_percentage) + immunity_color.red() * immunity_percentage),
+            int(final_color.green() * (1 - immunity_percentage) + immunity_color.green() * immunity_percentage),
+            int(final_color.blue() * (1 - immunity_percentage) + immunity_color.blue() * immunity_percentage),
+            original_color[3]  # Preserve the original alpha value
+        )
+
+        # Update the segment image
+        image = self.segment_images[index].convert("RGBA")
+        for x in range(image.width):
+            for y in range(image.height):
+                r, g, b, a = image.getpixel((x, y))
+                if a > 0:
+                    # Blend the original color with the final color based on the alpha value
+                    blended_color = QColor(
+                        int(r + (final_color.red() - r) * (a / 255)),
+                        int(g + (final_color.green() - g) * (a / 255)),
+                        int(b + (final_color.blue() - b) * (a / 255)),
+                        a
+                    )
+                    image.putpixel((x, y), blended_color.getRgb())
+
+        # Update the segment image
+        self.segment_images[index] = image
+
+        # Redraw the entire composite image
+        self.redraw_all_segments()
 
 
-    #Define what you want buttons to do
-    def run(self):
-        text = self.text_box.text()
-        if text:
-            param = int(text)
-        else:
-            param = 0
-        self.canvas.turnRed(self, region2, param)
+    def redraw_all_segments(self):
+        # Create a blank white image to serve as the base
+        combined_image = Image.new('RGBA', self.segment_images[0].size, (255, 255, 255, 0))
 
-class CanvasWidget(QWidget):
-    def __init__(self, parent):
-        super().__init__(parent)
-        self.rect_drawn = False
-        self.points = []
+        # Paste each segment onto the blank image
+        for segment_image in self.segment_images:
+            combined_image.paste(segment_image, (0, 0), segment_image)
 
-    def turnRed(self, region, param):
-        self.region = region
-        for i in param:
-            for row in region:
-                for pixel in row:
-                    if np.allclose(pixel, [1,1,1]):
-                        pixel[1] = 0
-                        pixel[2] = 0
-                        pixel[0] = pixel[0] + 0.1
-                        plt.imshow(region)
-                        plt.show()
-                        self.update()
-
-    def paintEvent(self, event):
-        if self.rect_drawn:
-            #After a button is clicked
-            painter = QPainter(self)
-            pixmap = QPixmap("region_2.png")
-            painter.drawPixmap(self.rect(), pixmap)
-
-        else:
-            #Before a button is clicked
-            painter = QPainter(self)
-            pixmap = QPixmap("out_put_regions\\region_2.png")
-            painter.drawPixmap(self.rect(), pixmap)
-            
+        # Update the label with the modified image
+        qimage = ImageQt.ImageQt(combined_image)
+        pixmap = QPixmap.fromImage(qimage)
+        self.combined_label.setPixmap(pixmap)
 
 def main():
     app = QApplication(sys.argv)
-    window = DrawingApp()
-    window.show()
+
+    # Replace the following with the actual paths to your segment images
+    segment_paths = [
+        'Disease-Simulator/output_regions/region_2.png',
+        'Disease-Simulator/output_regions/region_3.png',
+        'Disease-Simulator/output_regions/region_4.png',
+        'Disease-Simulator/output_regions/region_5.png',
+        'Disease-Simulator/output_regions/region_6.png',
+        'Disease-Simulator/output_regions/region_7.png',
+        'Disease-Simulator/output_regions/region_8.png',
+        'Disease-Simulator/output_regions/region_9.png'
+    ]
+
+    viewer = ImageViewer(segment_paths)
+    viewer.show()
+
     sys.exit(app.exec())
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
