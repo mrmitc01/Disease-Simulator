@@ -11,10 +11,14 @@ class ImageViewer(QMainWindow):
         self.totalDead = 0
         self.totalRecovered = 0
 
-        statisticsXCoord = 20
+        statisticsXCoord = 10
         infectedLabelYCoord = 160
         deadLabelYCoord = 180
         recoveredLabelYCoord = 200
+        labelWidgetWidth = 200
+        labelWidgetHeight = 250
+        labelWidth = 150
+        labelHeight = 20
         colorStyle = "color: white; background-color: black"
 
         self.segment_paths = segment_paths
@@ -27,14 +31,17 @@ class ImageViewer(QMainWindow):
         self.central_widget = QWidget(self)
         self.setCentralWidget(self.central_widget)
 
-        self.infectedLabel = QLabel("Total Infected: " + str(self.totalInfected), self.central_widget)
-        self.infectedLabel.move(statisticsXCoord, infectedLabelYCoord)
+        self.label_widget = QWidget(self)
+        self.label_widget.setGeometry(0,0,labelWidgetWidth,labelWidgetHeight)
+
+        self.infectedLabel = QLabel("Total Infected: " + str(self.totalInfected), self.label_widget)
+        self.infectedLabel.setGeometry(statisticsXCoord, infectedLabelYCoord, labelWidth, labelHeight)
         self.infectedLabel.setStyleSheet(colorStyle)
-        self.deadLabel = QLabel("Total Dead: " + str(self.totalDead), self.central_widget)
-        self.deadLabel.move(statisticsXCoord, deadLabelYCoord)
+        self.deadLabel = QLabel("Total Dead: " + str(self.totalDead), self.label_widget)
+        self.deadLabel.setGeometry(statisticsXCoord, deadLabelYCoord, labelWidth, labelHeight)
         self.deadLabel.setStyleSheet(colorStyle)
-        self.recoveredLabel = QLabel("Total Recovered: " + str(self.totalRecovered), self.central_widget)
-        self.recoveredLabel.move(statisticsXCoord, recoveredLabelYCoord)
+        self.recoveredLabel = QLabel("Total Recovered: " + str(self.totalRecovered), self.label_widget)
+        self.recoveredLabel.setGeometry(statisticsXCoord, recoveredLabelYCoord, labelWidth, labelHeight)
         self.recoveredLabel.setStyleSheet(colorStyle)
 
         self.layout = QVBoxLayout()
