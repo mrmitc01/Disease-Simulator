@@ -7,6 +7,16 @@ class ImageViewer(QMainWindow):
     def __init__(self, segment_paths):
         super().__init__()
 
+        self.totalInfected = 0
+        self.totalDead = 0
+        self.totalRecovered = 0
+
+        statisticsXCoord = 20
+        infectedLabelYCoord = 160
+        deadLabelYCoord = 180
+        recoveredLabelYCoord = 200
+        colorStyle = "color: white; background-color: black"
+
         self.segment_paths = segment_paths
         self.segment_images = [Image.open(path) for path in segment_paths]
         self.infection_percentages = [0.0] * len(segment_paths)
@@ -16,6 +26,16 @@ class ImageViewer(QMainWindow):
 
         self.central_widget = QWidget(self)
         self.setCentralWidget(self.central_widget)
+
+        self.infectedLabel = QLabel("Total Infected: " + str(self.totalInfected), self.central_widget)
+        self.infectedLabel.move(statisticsXCoord, infectedLabelYCoord)
+        self.infectedLabel.setStyleSheet(colorStyle)
+        self.deadLabel = QLabel("Total Dead: " + str(self.totalDead), self.central_widget)
+        self.deadLabel.move(statisticsXCoord, deadLabelYCoord)
+        self.deadLabel.setStyleSheet(colorStyle)
+        self.recoveredLabel = QLabel("Total Recovered: " + str(self.totalRecovered), self.central_widget)
+        self.recoveredLabel.move(statisticsXCoord, recoveredLabelYCoord)
+        self.recoveredLabel.setStyleSheet(colorStyle)
 
         self.layout = QVBoxLayout()
 
@@ -138,9 +158,14 @@ class ImageViewer(QMainWindow):
         # Redraw the entire composite image
         self.redraw_all_segments()
 
-
     def updateStatisticsLabels(self, numInfected, numDead, numRecovered):
-        global totalInfected, totalDead, totalRecovered
+        self.totalInfected += numInfected
+        self.totalDead += numDead
+        self.totalRecovered += numRecovered
+
+        self.infectedLabel.setText("Total Infected: " + str(self.totalInfected))
+        self.deadLabel.setText("Total Dead: " + str(self.totalDead))
+        self.recoveredLabel.setText("Total Recovered: " + str(self.totalRecovered))
     
     def redraw_all_segments(self):
         # Create a blank white image to serve as the base
@@ -154,90 +179,7 @@ class ImageViewer(QMainWindow):
         qimage = ImageQt.ImageQt(combined_image)
         pixmap = QPixmap.fromImage(qimage)
         self.combined_label.setPixmap(pixmap)
-'''
-totalInfected = 0
-totalDead = 0
-totalRecovered = 0
 
-class KentuckyViewer(QMainWindow):
-    def __init__(self, segments):
-        super().__init__()
-
-        self.segments = segments
-        self.initUI()
-
-    def initUI(self):
-        statisticsXCoord = 20
-        infectedLabelYCoord = 40
-        deadLabelYCoord = 60
-        recoveredLabelYCoord = 80
-        colorStyle = "color: white; background-color: black"
-
-        self.central_widget = QWidget(self)
-        self.setCentralWidget(self.central_widget)
-
-        self.layout = QVBoxLayout()
-        self.layout = QVBoxLayout()
-
-        self.canvas_label = QLabel(self)
-        self.layout.addWidget(self.canvas_label)
-
-        self.buttons_layout = QVBoxLayout()
-
-        self.region_widgets = []
-
-        for i, segment in enumerate(self.segments):
-            region_widget = QPushButton(f"Region {i + 1}", self)
-            region_widget.clicked.connect(lambda _, idx=i: self.update_color(idx))
-            self.region_widgets.append(region_widget)
-            self.buttons_layout.addWidget(region_widget)
-
-        self.layout.addLayout(self.buttons_layout)
-
-        self.central_widget.setLayout(self.layout)
-
-        self.setGeometry(100, 100, 1000, 600)
-        self.setWindowTitle('Kentucky Map Viewer')
-
-        self.update_canvas()
-
-        self.infectedLabel = QLabel("Total Infected: " + str(totalInfected), self.central_widget)
-        self.infectedLabel.move(statisticsXCoord, infectedLabelYCoord)
-        self.infectedLabel.setStyleSheet(colorStyle)
-        self.deadLabel = QLabel("Total Dead: " + str(totalDead), self.central_widget)
-        self.deadLabel.move(statisticsXCoord, deadLabelYCoord)
-        self.deadLabel.setStyleSheet(colorStyle)
-        self.recoveredLabel = QLabel("Total Recovered: " + str(totalRecovered), self.central_widget)
-        self.recoveredLabel.move(statisticsXCoord, recoveredLabelYCoord)
-        self.recoveredLabel.setStyleSheet(colorStyle)
-
-    def update_color(self, region_index):
-        # Update the color of the specific region dynamically
-        region = self.segments[region_index]
-        region[:, :, :3] = np.array([255, 0, 0])  # Set color to red
-        io.imsave(f'region_{region_index + 1}.png', region)
-
-        # Update the canvas to reflect the changes
-        self.update_canvas()
-
-    def update_canvas(self):
-        # Combine the regions into the full image of Kentucky
-        composite_image = np.zeros_like(self.segments[0])
-        for region in self.segments:
-            composite_image += region
-
-        # Display the composite image
-        io.imsave('combined_kentucky.png', composite_image)
-        pixmap = QPixmap('combined_kentucky.png')
-        self.canvas_label.setPixmap(pixmap)
-        totalInfected += numInfected
-        totalDead += numDead
-        totalRecovered += numRecovered
-
-        self.infectedLabel.setText("Total Infected: " + str(numInfected))
-        self.deadLabel.setText("Total Dead: " + str(numDead))
-        self.recoveredLabel.setText("Total Recovered: " + str(numRecovered))
-        '''
 # Creates an instance of the DrawingApp class, shows the main window, and starts the application loop.
 def main():
     app = QApplication(sys.argv)
