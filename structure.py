@@ -11,22 +11,30 @@ import numpy as np
 
 # REGIONS
 RED_REGION_COUNTIES = ['Trimble', 'Oldham', 'Henry', 'Carroll', 'Shelby', 'Jefferson', 'Bullitt', 'Spencer']
-YELLOW_REGION_COUNTIES = ['Meade', 'Grayson', 'Hardin', 'Larue', 'Washington', 'Marion', 'Taylor', 'Green', 'Hart', 'Edmonson', 'Breckinridge', 'Warren', 'Simpson', 'Barren', 'Allen', 'Metcalfe', 'Monroe', 'Nelson', 'Adair', 'Russell', 'Clinton', 'Cumberland']
-ORANGE_REGION_COUNTIES = ['Hancock', 'Ohio', 'Butler', 'Logan', 'Todd', 'Muhlenberg', 'McLean', 'Daviess', 'Henderson', 'Webster', 'Union', 'Hopkins', 'Caldwell', 'Christian']
-GRAY_REGION_COUNTIES = ['Crittenden', 'Lyon', 'Trigg', 'Livingston', 'Marshall', 'Calloway', 'McCracken', 'Graves', 'Ballard', 'Carlisle', 'Hickman', 'Fulton']
-PINK_REGION_COUNTIES = ['Boone', 'Gallatin', 'Owen', 'Franklin', 'Anderson', 'Woodford', 'Scott', 'Grant', 'Kenton', 'Campbell', 'Pendleton', 'Harrison', 'Bourbon', 'Fayette', 'Jessamine', 'Bracken']
-BROWN_REGION_COUNTIES = ['Whitley', 'Knox', 'Laurel', 'Jackson', 'Estill', 'Madison', 'Rockcastle', 'Pulaski', 'McCreary', 'Wayne', 'Casey', 'Boyle', 'Mercer', 'Garrard', 'Lincoln']
-BLUE_REGION_COUNTIES = ['Bell', 'Clay', 'Owsley', 'Lee', 'Wolfe', 'Breathitt', 'Perry', 'Leslie', 'Harlan', 'Letcher', 'Knott', 'Magoffin', 'Johnson', 'Floyd', 'Pike', 'Martin']
-MAROON_REGION_COUNTIES = ['Powell', 'Clark', 'Montgomery', 'Nicholas', 'Robertson', 'Mason', 'Fleming', 'Bath', 'Menifee', 'Morgan', 'Rowan', 'Lewis', 'Greenup', 'Carter', 'Elliott', 'Lawrence', 'Boyd']
+YELLOW_REGION_COUNTIES = ['Meade', 'Grayson', 'Hardin', 'Larue', 'Washington', 'Marion', 'Taylor', 'Green', 'Hart',
+                          'Edmonson', 'Breckinridge', 'Warren', 'Simpson', 'Barren', 'Allen', 'Metcalfe', 'Monroe',
+                          'Nelson', 'Adair', 'Russell', 'Clinton', 'Cumberland']
+ORANGE_REGION_COUNTIES = ['Hancock', 'Ohio', 'Butler', 'Logan', 'Todd', 'Muhlenberg', 'McLean', 'Daviess', 'Henderson',
+                          'Webster', 'Union', 'Hopkins', 'Caldwell', 'Christian']
+GRAY_REGION_COUNTIES = ['Crittenden', 'Lyon', 'Trigg', 'Livingston', 'Marshall', 'Calloway', 'McCracken', 'Graves',
+                        'Ballard', 'Carlisle', 'Hickman', 'Fulton']
+PINK_REGION_COUNTIES = ['Boone', 'Gallatin', 'Owen', 'Franklin', 'Anderson', 'Woodford', 'Scott', 'Grant', 'Kenton',
+                        'Campbell', 'Pendleton', 'Harrison', 'Bourbon', 'Fayette', 'Jessamine', 'Bracken']
+BROWN_REGION_COUNTIES = ['Whitley', 'Knox', 'Laurel', 'Jackson', 'Estill', 'Madison', 'Rockcastle', 'Pulaski',
+                         'McCreary', 'Wayne', 'Casey', 'Boyle', 'Mercer', 'Garrard', 'Lincoln']
+BLUE_REGION_COUNTIES = ['Bell', 'Clay', 'Owsley', 'Lee', 'Wolfe', 'Breathitt', 'Perry', 'Leslie', 'Harlan', 'Letcher',
+                        'Knott', 'Magoffin', 'Johnson', 'Floyd', 'Pike', 'Martin']
+MAROON_REGION_COUNTIES = ['Powell', 'Clark', 'Montgomery', 'Nicholas', 'Robertson', 'Mason', 'Fleming', 'Bath',
+                          'Menifee', 'Morgan', 'Rowan', 'Lewis', 'Greenup', 'Carter', 'Elliott', 'Lawrence', 'Boyd']
 
 
 # STRUCTURE
 class Disease:
     def __init__(self, name, infection, recovery, mortality):
-        self.name = name               # Disease name
-        self.infection = infection     # Probability of infection when adjacent to an infected individual
-        self.recovery = recovery       # Number of turns for an infected individual to recover
-        self.mortality = mortality     # Probability of death for an infected individual
+        self.name = name  # Disease name
+        self.infection = infection  # Probability of infection when adjacent to an infected individual
+        self.recovery = recovery  # Number of turns for an infected individual to recover
+        self.mortality = mortality  # Probability of death for an infected individual
 
 
 # Enumerates different states an individual can be in, such as SUSCEPTIBLE, INFECTED, RECOVERED, and DEAD.
@@ -35,6 +43,7 @@ class State(Enum):
     INFECTED = "I"
     RECOVERED = "R"
     DEAD = "D"
+
 
 # Represents a geographical region with attributes like name, population, land area, and population density.
 class Region:
@@ -51,26 +60,26 @@ class Region:
         self.percent_infected = 0
         self.percent_susceptible = 100
 
-
     # Provides a method to update percentage values based on the current counts.
     def update_percentages(self):
-        if (self.population <= 0):
+        if self.population <= 0:
             raise ValueError('A population below or equal to 0 is not possible.')
 
         self.percent_dead = self.dead_count / self.population
         self.percent_infected = self.infected_count / self.population
         self.percent_susceptible = self.susceptible_count / self.population
 
-    # Function updates the number of infected and susceptible people inside it's own region based on the rates defined for the disease
+    # Function updates the number of infected and susceptible people inside its own region based on the rates defined for the disease
     def infect(self, infection_rate):
         new_infections = min(self.susceptible_count, int(self.infected_count * infection_rate))
         self.susceptible_count -= new_infections
         self.infected_count += new_infections
-    
-    #Function updates the number of infected and susceptible people across regions based on the rates defined for the disease
+
+    # Function updates the number of infected and susceptible people across regions based on the rates defined for the disease
     def infect_between_regions(self, infection_rate, regions):
         region_to_infect = random.choice(regions)
-        new_infections = min(region_to_infect.susceptible_count, int(self.infected_count + region_to_infect.infected_count * infection_rate))
+        new_infections = min(region_to_infect.susceptible_count,
+                             int(self.infected_count + region_to_infect.infected_count * infection_rate))
         region_to_infect.susceptible_count -= new_infections
         region_to_infect.infected_count += new_infections
 
@@ -101,16 +110,16 @@ def run_simulation(regions, disease_stats, num_days):
 
     start_infection(regions)
     # Iterate through each "day" in the simulation
-    #print(f"{'Day':<5}{}")
+    # print(f"{'Day':<5}{}")
 
     for day in range(num_days):
         # Iterate through each region
-        for region in regions: 
+        for region in regions:
             # print(region.name, 'infected', region.infected_count, 'day', day)
             print(f"{day:<5}{region.name:<20}{region.infected_count:<15}")
             # Calculate the number of new infections
             new_infections = region.infect(infection_rate)
-            
+
             region.infect_between_regions(infection_rate, regions)
             # Calculate the number of recoveries
             region.recover(recovery_rate)
@@ -121,9 +130,7 @@ def run_simulation(regions, disease_stats, num_days):
             # Update the percentages
             region.update_percentages()
 
-        print(f"Day {day+1} - Total cases: {sum(region.get_total_cases() for region in regions)}")
-
-
+        print(f"Day {day + 1} - Total cases: {sum(region.get_total_cases() for region in regions)}")
 
 
 # Start the infection in a random region
@@ -131,6 +138,7 @@ def start_infection(regions):
     start_region = random.choice(regions)
     start_region.infected_count += 1
     print(f"Initial infection started in {start_region.name}")
+
 
 # DISEASES
 COVID = Disease(name="Covid-19", infection=0.2025, recovery=14, mortality=0.027)
@@ -141,16 +149,16 @@ EBOLA = Disease(name="Ebola", infection=0.0886, recovery=30, mortality=0.60)
 # Main block: Reads population data from a CSV file and prints each row.
 if __name__ == '__main__':
     red_region = Region('Outer Bluegrass', 0, 0, 0)
-    yellow_region = Region('Pennyroyal',0,0,0)
+    yellow_region = Region('Pennyroyal', 0, 0, 0)
     orange_region = Region('Western Coal Fields', 0, 0, 0)
-    pink_region = Region('Inner Blugrass',0,0,0)
-    brown_region = Region('Mississipi Pleateu',0,0,0)
-    blue_region = Region('Eastern Coal Fields',0,0,0)
-    maroon_region = Region('Appalachia',0,0,0)
-    gray_region = Region('Jackson Purchase',0,0,0)
+    pink_region = Region('Inner Blugrass', 0, 0, 0)
+    brown_region = Region('Mississipi Pleateu', 0, 0, 0)
+    blue_region = Region('Eastern Coal Fields', 0, 0, 0)
+    maroon_region = Region('Appalachia', 0, 0, 0)
+    gray_region = Region('Jackson Purchase', 0, 0, 0)
 
     with open('./Data Files/KY-Population-Data.csv', newline='') as dataFile:
-        reader = csv.reader(dataFile, delimiter= ',', quotechar= '|')
+        reader = csv.reader(dataFile, delimiter=',', quotechar='|')
         header = next(reader)
         county_column_index = header.index("ï»¿Region")
         population_column_index = header.index('Total Population')
@@ -201,5 +209,6 @@ if __name__ == '__main__':
                 gray_region.land_area += float(row[land_area_column_index])
                 gray_region.populaton_density += float(row[population_column_index])
 
-    All_Regions = [red_region, orange_region, yellow_region, pink_region, brown_region, blue_region, maroon_region, gray_region]
+    All_Regions = [red_region, orange_region, yellow_region, pink_region, brown_region, blue_region, maroon_region,
+                   gray_region]
     run_simulation(All_Regions, COVID, 10)
