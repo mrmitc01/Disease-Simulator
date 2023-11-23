@@ -9,7 +9,7 @@ from structure import initialize_regions, run_simulation, COVID
 
 
 class ImageViewer(QMainWindow):
-    def __init__(self, segment_paths):
+    def __init__(self, segment_paths, All_Regions):
         super().__init__()
 
         self.totalInfected = 0
@@ -27,6 +27,7 @@ class ImageViewer(QMainWindow):
         colorStyle = "color: white; background-color: black"
 
         self.segment_paths = segment_paths
+        self.All_Regions = All_Regions
         self.segment_images = [Image.open(path) for path in segment_paths]
         self.infection_percentages = [0.0] * len(segment_paths)
         self.immunity_percentages = [0.0] * len(segment_paths)
@@ -265,18 +266,52 @@ class ImageViewer(QMainWindow):
         print("Simulation stopped.")
 
     def reset_simulation(self):
-        self.timer.stop()
-        self.days_elapsed = 0
-        # Add reset logic here as needed
+        self.timer.stop()  # Stop the simulation timer if it's running
+        self.days_elapsed = 0  # Reset the days elapsed counter
+
+        # Reset all counts and statistics for each region
+        for region in self.All_Regions:
+            region.infected_count = 0
+            region.dead_count = 0
+            region.recovered_count = 0
+            region.susceptible_count = region.population
+            region.update_percentages()  # Update the percentages based on the reset counts
+
+        # Reset the total counts in the GUI
+        self.totalInfected = 0
+        self.totalDead = 0
+        self.totalRecovered = 0
+
+        # Update the labels to display the reset counts
+        self.infectedLabel.setText("Total Infected: " + str(self.totalInfected))
+        self.deadLabel.setText("Total Dead: " + str(self.totalDead))
+        self.recoveredLabel.setText("Total Recovered: " + str(self.totalRecovered))
+
+        # Redraw all segments to reflect the reset state
+        self.redraw_all_segments()
+
         print("Simulation reset.")
 
     def simulate_day(self):
         # Simulation logic for each day goes here
         self.days_elapsed += 1
         print(f"Day {self.days_elapsed} simulated.")
-        # Add simulation function calls here
-        All_Regions = initialize_regions()
-        run_simulation(All_Regions, COVID, self.days_elapsed)
+        # Run simulation and get statistics updates
+        numInfected, numDead, numRecovered = self.run_simulation_day()
+
+        # Update statistics labels in GUI
+        self.updateStatisticsLabels(numInfected, numDead, numRecovered)
+
+    def run_simulation_day(self):
+        # Simulation logic for each day goes here
+        run_simulation(self.All_Regions, COVID, self.days_elapsed)
+
+        # Calculate statistics from the simulation results
+        numInfected = sum(region.infected_count for region in self.All_Regions)
+        numDead = sum(region.dead_count for region in self.All_Regions)
+        numRecovered = sum(region.recovered_count for region in self.All_Regions)
+
+        return numInfected, numDead, numRecovered
 
     def updateStatisticsLabels(self, numInfected, numDead, numRecovered):
         self.totalInfected += numInfected
@@ -317,7 +352,10 @@ def main():
         'output_regions/region_9.png'
     ]
 
-    viewer = ImageViewer(segment_paths)
+    # Initialize regions
+    All_Regions = initialize_regions()
+
+    viewer = ImageViewer(segment_paths, All_Regions)
     viewer.show()
 
     sys.exit(app.exec())
