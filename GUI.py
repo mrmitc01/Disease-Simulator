@@ -5,6 +5,8 @@ from PyQt6.QtGui import QPixmap, QImage, QColor, QIcon
 import sys
 from PIL import Image, ImageQt
 
+from structure import initialize_regions, run_simulation, COVID
+
 
 class ImageViewer(QMainWindow):
     def __init__(self, segment_paths):
@@ -57,10 +59,15 @@ class ImageViewer(QMainWindow):
         # Dropdown for region selection
         self.region_dropdown = QComboBox(self)
         self.region_dropdown.addItems([f"Region {i + 2}" for i in range(len(segment_paths))])
+        default_region_index = 0  # Set the index of the default region (e.g., Region 2)
+        self.region_dropdown.setCurrentIndex(default_region_index)
 
         # Dropdown for disease selection
         self.disease_dropdown = QComboBox(self)
-        self.disease_dropdown.addItems(["COVID-19", "Measles", "Generic flu", "Ebola"])  # We can add other disease
+        self.disease_dropdown.addItems(["Custom", "COVID-19", "Measles", "Generic flu", "Ebola"])
+        default_disease_index = 0  # Set the index of the default region (e.g., Custom)
+        self.disease_dropdown.setCurrentIndex(default_disease_index)
+        self.disease_dropdown.currentIndexChanged.connect(self.update_fields_on_disease_change)
         self.selection_layout.addWidget(self.region_dropdown)
         self.selection_layout.addWidget(self.disease_dropdown)
 
@@ -158,6 +165,40 @@ class ImageViewer(QMainWindow):
         except ValueError:
             print("Invalid percentage. Please enter a number between 0 and 100.")
 
+    def update_fields_on_disease_change(self):
+        selected_disease = self.disease_dropdown.currentText()
+
+        # Scale factor for converting raw values to percentages (assuming a maximum value)
+        max_infection = 100.0
+        max_immunity = 100.0
+        max_mortality = 100.0
+
+        if selected_disease == "COVID-19":
+            # Set default values for COVID-19
+            self.infection_input.setText(str((5.0 / max_infection) * 100))  # Scaled to percentage
+            self.immunity_input.setText(str((10.0 / max_immunity) * 100))  # Scaled to percentage
+            self.mortality_input.setText(str((2.0 / max_mortality) * 100))  # Scaled to percentage
+        elif selected_disease == "Measles":
+            # Set values for Measles
+            self.infection_input.setText(str(12.0 / max_infection * 100))  # Scaled to percentage
+            self.immunity_input.setText(str(20.0 / max_immunity * 100))  # Scaled to percentage
+            self.mortality_input.setText(str(5.0 / max_mortality * 100))  # Scaled to percentage
+        elif selected_disease == "Generic flu":
+            # Set values for Generic flu
+            self.infection_input.setText(str(8.0 / max_infection * 100))  # Scaled to percentage
+            self.immunity_input.setText(str(15.0 / max_immunity * 100))  # Scaled to percentage
+            self.mortality_input.setText(str(3.0 / max_mortality * 100))  # Scaled to percentage
+        elif selected_disease == "Ebola":
+            # Set values for Ebola
+            self.infection_input.setText(str(50.0 / max_infection * 100))  # Scaled to percentage
+            self.immunity_input.setText(str(5.0 / max_immunity * 100))  # Scaled to percentage
+            self.mortality_input.setText(str(70.0 / max_mortality * 100))  # Scaled to percentage
+        elif selected_disease == "Custom":
+            # Clear values for custom inputs
+            self.infection_input.clear()
+            self.immunity_input.clear()
+            self.mortality_input.clear()
+
     def update_color(self, index):
         # Get the original color of the segment
         original_color = self.original_colors[index]
@@ -234,6 +275,8 @@ class ImageViewer(QMainWindow):
         self.days_elapsed += 1
         print(f"Day {self.days_elapsed} simulated.")
         # Add simulation function calls here
+        All_Regions = initialize_regions()
+        run_simulation(All_Regions, COVID, self.days_elapsed)
 
     def updateStatisticsLabels(self, numInfected, numDead, numRecovered):
         self.totalInfected += numInfected

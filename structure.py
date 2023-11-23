@@ -1,8 +1,7 @@
 """
 Defines classes for diseases, regions, and statistics. Reads population data from a CSV file.
 """
-
-import random
+import codecs
 from enum import Enum
 import csv
 import random
@@ -69,13 +68,15 @@ class Region:
         self.percent_infected = self.infected_count / self.population
         self.percent_susceptible = self.susceptible_count / self.population
 
-    # Function updates the number of infected and susceptible people inside its own region based on the rates defined for the disease
+    # Function updates the number of infected and susceptible people inside its own region based on the rates defined
+    # for the disease
     def infect(self, infection_rate):
         new_infections = min(self.susceptible_count, int(self.infected_count * infection_rate))
         self.susceptible_count -= new_infections
         self.infected_count += new_infections
 
-    # Function updates the number of infected and susceptible people across regions based on the rates defined for the disease
+    # Function updates the number of infected and susceptible people across regions based on the rates defined for
+    # the disease
     def infect_between_regions(self, infection_rate, regions):
         region_to_infect = random.choice(regions)
         new_infections = min(region_to_infect.susceptible_count,
@@ -146,8 +147,8 @@ MEASLES = Disease(name="Measles", infection=0.6329, recovery=7, mortality=0.0001
 FLU = Disease(name="Generic flu", infection=0.0759, recovery=10, mortality=0.0001)
 EBOLA = Disease(name="Ebola", infection=0.0886, recovery=30, mortality=0.60)
 
-# Main block: Reads population data from a CSV file and prints each row.
-if __name__ == '__main__':
+
+def initialize_regions():
     red_region = Region('Outer Bluegrass', 0, 0, 0)
     yellow_region = Region('Pennyroyal', 0, 0, 0)
     orange_region = Region('Western Coal Fields', 0, 0, 0)
@@ -157,10 +158,10 @@ if __name__ == '__main__':
     maroon_region = Region('Appalachia', 0, 0, 0)
     gray_region = Region('Jackson Purchase', 0, 0, 0)
 
-    with open('./Data Files/KY-Population-Data.csv', newline='') as dataFile:
+    with codecs.open('./Data Files/KY-Population-Data.csv', 'r', 'utf-8-sig') as dataFile:
         reader = csv.reader(dataFile, delimiter=',', quotechar='|')
         header = next(reader)
-        county_column_index = header.index("ï»¿Region")
+        county_column_index = header.index("Region")
         population_column_index = header.index('Total Population')
         land_area_column_index = header.index('Land Area')
         population_density_column_index = header.index('Population Density')
@@ -211,4 +212,11 @@ if __name__ == '__main__':
 
     All_Regions = [red_region, orange_region, yellow_region, pink_region, brown_region, blue_region, maroon_region,
                    gray_region]
-    run_simulation(All_Regions, COVID, 10)
+
+    return All_Regions
+
+
+# Main block: Reads population data from a CSV file and prints each row.
+if __name__ == '__main__':
+    All_Regions = initialize_regions()
+    # run_simulation(All_Regions, COVID, 10)
