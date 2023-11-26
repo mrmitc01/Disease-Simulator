@@ -154,6 +154,14 @@ class ImageViewer(QMainWindow):
 
             # Validate percentages
             if 0 <= infection_percentage <= 100 and 0 <= immunity_percentage <= 100 and 0 <= mortality_percentage <= 100:
+                # Get the population of the selected region
+                selected_region_population = self.All_Regions[selected_region_index].population
+
+                # Convert counts to percentages
+                infection_count_percentage = self.totalInfected / selected_region_population * 100
+                immunity_count_percentage = self.totalRecovered / selected_region_population * 100
+                mortality_count_percentage = self.totalDead / selected_region_population * 100
+
                 # Update the percentages for the selected region
                 self.infection_percentages[selected_region_index] = infection_percentage
                 self.immunity_percentages[selected_region_index] = immunity_percentage
