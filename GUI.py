@@ -58,7 +58,7 @@ class ImageViewer(QMainWindow):
 
         # Dropdown for region selection
         self.region_dropdown = QComboBox(self)
-        self.region_dropdown.addItems([f"Region {i + 2}" for i in range(len(segment_paths))])
+        self.region_dropdown.addItems([region.name for region in self.All_Regions])
         default_region_index = 0  # Set the index of the default region (e.g., Region 2)
         self.region_dropdown.setCurrentIndex(default_region_index)
 
