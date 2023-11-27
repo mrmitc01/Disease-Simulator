@@ -2,7 +2,8 @@ import sys
 from PIL import Image, ImageQt
 from PyQt6.QtCore import QTimer
 from PyQt6.QtGui import QPixmap, QIcon
-from PyQt6.QtWidgets import QApplication, QLabel, QMainWindow, QVBoxLayout, QWidget, QPushButton, QComboBox, QHBoxLayout
+from PyQt6.QtWidgets import QApplication, QLabel, QMainWindow, QVBoxLayout, QWidget, QPushButton, QComboBox, \
+    QHBoxLayout, QMessageBox
 from structure import initialize_regions, run_simulation, COVID, start_infection
 
 
@@ -28,6 +29,8 @@ class ImageViewer(QMainWindow):
         self.All_Regions = All_Regions
         self.infection_started = False  # Add a flag to track if infection has started
         self.segment_images = [Image.open(path) for path in segment_paths]
+        self.original_images = [image.copy() for image in
+                                self.segment_images]  # Save a copy of the original images for resetting
         self.infection_percentages = [0.0] * len(segment_paths)
         self.immunity_percentages = [0.0] * len(segment_paths)
         self.mortality_percentages = [0.0] * len(segment_paths)
@@ -36,22 +39,10 @@ class ImageViewer(QMainWindow):
         self.central_widget = QWidget(self)
         self.setCentralWidget(self.central_widget)
 
-        self.label_widget = QWidget(self)
-        self.label_widget.setGeometry(0, 0, labelWidgetWidth, labelWidgetHeight)
-
-        self.infectedLabel = QLabel("Total Infected: " + str(self.totalInfected), self.label_widget)
-        self.infectedLabel.setGeometry(statisticsXCoord, infectedLabelYCoord, labelWidth, labelHeight)
-        self.infectedLabel.setStyleSheet(colorStyle)
-        self.deadLabel = QLabel("Total Dead: " + str(self.totalDead), self.label_widget)
-        self.deadLabel.setGeometry(statisticsXCoord, deadLabelYCoord, labelWidth, labelHeight)
-        self.deadLabel.setStyleSheet(colorStyle)
-        self.recoveredLabel = QLabel("Total Recovered: " + str(self.totalRecovered), self.label_widget)
-        self.recoveredLabel.setGeometry(statisticsXCoord, recoveredLabelYCoord, labelWidth, labelHeight)
-        self.recoveredLabel.setStyleSheet(colorStyle)
+        # Set a fixed window size
+        self.setFixedSize(800, 500)
 
         self.layout = QVBoxLayout()
-
-        self.input_layout = QVBoxLayout()
 
         # Create a horizontal layout for region and disease selection
         self.selection_layout = QHBoxLayout()
@@ -67,20 +58,39 @@ class ImageViewer(QMainWindow):
         self.disease_dropdown.addItems(["COVID-19", "Measles", "Generic flu", "Ebola"])
         default_disease_index = 0  # Set the index of the default region (e.g., Custom)
         self.disease_dropdown.setCurrentIndex(default_disease_index)
+
+        # Add a view stats button
+        self.view_stats_button = QPushButton("View Stats", self)
+        self.view_stats_button.clicked.connect(self.view_stats)
+
         self.selection_layout.addWidget(self.region_dropdown)
         self.selection_layout.addWidget(self.disease_dropdown)
+        self.selection_layout.addWidget(self.view_stats_button)
 
         self.layout.addLayout(self.selection_layout)  # Add the selection layout
 
-        # Button to apply changes
-        apply_button = QPushButton("Apply Changes", self)
-        apply_button.clicked.connect(self.apply_changes)
-        self.input_layout.addWidget(apply_button)
+        label_combined_layout = QHBoxLayout()
 
-        self.layout.addLayout(self.input_layout)
+        # Label widget with statistics
+        self.label_widget = QWidget(self)
+        self.label_widget.setGeometry(0, 0, labelWidgetWidth, labelWidgetHeight)
+
+        self.infectedLabel = QLabel("Total Infected: " + str(self.totalInfected), self.label_widget)
+        self.infectedLabel.setGeometry(statisticsXCoord, infectedLabelYCoord, labelWidth, labelHeight)
+        self.infectedLabel.setStyleSheet(colorStyle)
+        self.deadLabel = QLabel("Total Dead: " + str(self.totalDead), self.label_widget)
+        self.deadLabel.setGeometry(statisticsXCoord, deadLabelYCoord, labelWidth, labelHeight)
+        self.deadLabel.setStyleSheet(colorStyle)
+        self.recoveredLabel = QLabel("Total Recovered: " + str(self.totalRecovered), self.label_widget)
+        self.recoveredLabel.setGeometry(statisticsXCoord, recoveredLabelYCoord, labelWidth, labelHeight)
+        self.recoveredLabel.setStyleSheet(colorStyle)
 
         self.combined_label = QLabel(self)
-        self.layout.addWidget(self.combined_label)
+
+        label_combined_layout.addWidget(self.label_widget)  # Add the label widget to the layout
+        label_combined_layout.addWidget(self.combined_label)  # Add the combined label to the layout
+
+        self.layout.addLayout(label_combined_layout)  # Add the QHBoxLayout to the main layout
 
         # Create a QVBoxLayout for organizing the buttons
         self.button_layout = QVBoxLayout()
@@ -115,9 +125,36 @@ class ImageViewer(QMainWindow):
         self.timer.timeout.connect(self.simulate_day)
         self.days_elapsed = 0
 
+        # Add Days Elapsed and Total Cases to the status bar
+        self.statusBar = self.statusBar()
+        self.days_elapsed = 0
+        self.total_cases = 0
+        self.statusBar.showMessage(f"Days Elapsed: {self.days_elapsed} - Total Cases: {self.total_cases}")
+
         self.central_widget.setLayout(self.layout)
 
         self.setWindowTitle('Disease Simulation')
+        self.redraw_all_segments()
+
+    def view_stats(self):
+        selected_region_index = self.region_dropdown.currentIndex()
+        selected_region = self.All_Regions[selected_region_index]
+
+        # Show stats in a message box
+        stats_message = (
+            f"Region: {selected_region.name}\n"
+            f"Population: {selected_region.population}\n"
+            f"Infected Count: {selected_region.infected_count}\n"
+            f"Recovered Count: {selected_region.recovered_count}\n"
+            f"Dead Count: {selected_region.dead_count}\n"
+            f"Susceptible Count: {selected_region.susceptible_count}\n"
+            f"Population Density: {selected_region.population_density}\n"
+        )
+        QMessageBox.information(self, "Region Stats", stats_message)
+
+    def reset_images(self):
+        # Revert the images back to their original state
+        self.segment_images = [image.copy() for image in self.original_images]
         self.redraw_all_segments()
 
     def get_region_statistics(self, region_index):
@@ -131,7 +168,7 @@ class ImageViewer(QMainWindow):
 
     def apply_changes(self):
         # Get selected region and percentage inputs
-        for selected_region_index in range(0,8):
+        for selected_region_index in range(0, 8):
 
             # Retrieve statistics for the selected region
             num_infected, num_recovered, num_dead, region_population = self.get_region_statistics(selected_region_index)
@@ -140,7 +177,7 @@ class ImageViewer(QMainWindow):
             infection_percentage = (num_infected / region_population) * 100
             recovery_percentage = (num_recovered / region_population) * 100
             mortality_percentage = (num_dead / region_population) * 100
-            
+
             print(selected_region_index, mortality_percentage, infection_percentage, recovery_percentage)
             # Validate percentages
             if 0 <= infection_percentage <= 100 and 0 <= recovery_percentage <= 100 and 0 <= mortality_percentage <= 100:
@@ -160,7 +197,7 @@ class ImageViewer(QMainWindow):
 
         # Calculate the color based on infection, immunity, and mortality percentages
         infection_percentage = self.infection_percentages[index]
-        immunity_percentage = self.immunity_percentages[index] 
+        immunity_percentage = self.immunity_percentages[index]
         mortality_percentage = self.mortality_percentages[index]
 
         # Calculate colors based on percentages
@@ -238,6 +275,7 @@ class ImageViewer(QMainWindow):
         self.totalInfected = 0
         self.totalDead = 0
         self.totalRecovered = 0
+        self.total_cases = 0
 
         # Update the labels to display the reset counts
         self.infectedLabel.setText("Total Infected: " + str(self.totalInfected))
@@ -247,14 +285,18 @@ class ImageViewer(QMainWindow):
         # Ensure the simulation starts with a fresh state
         self.infection_started = False  # Update the flag to indicate infection start
 
-        # Redraw all segments to reflect the reset state
-        self.redraw_all_segments()
+        # Reset the images
+        self.reset_images()
+
+        # Reset the status bar
+        self.statusBar.showMessage(f"Days Elapsed: {self.days_elapsed} - Total Cases: {self.total_cases}")
 
         print("Simulation reset.")
 
     def simulate_day(self):
         # Simulation logic for each day goes here
         self.days_elapsed += 1
+        self.statusBar.showMessage(f"Days Elapsed: {self.days_elapsed} - Total Cases: {self.total_cases}")
         print(f"Day {self.days_elapsed} simulated.")
         # Run simulation and get statistics updates
         numInfected, numDead, numRecovered = self.run_simulation_day()
@@ -278,10 +320,14 @@ class ImageViewer(QMainWindow):
         self.totalInfected += numInfected
         self.totalDead += numDead
         self.totalRecovered += numRecovered
+        self.total_cases = self.totalInfected + self.totalDead + self.totalRecovered
 
         self.infectedLabel.setText("Total Infected: " + str(self.totalInfected))
         self.deadLabel.setText("Total Dead: " + str(self.totalDead))
         self.recoveredLabel.setText("Total Recovered: " + str(self.totalRecovered))
+
+        # Update the status bar to include total cases
+        self.statusBar.showMessage(f"Days Elapsed: {self.days_elapsed} - Total Cases: {self.total_cases}")
 
     def redraw_all_segments(self):
         # Create a blank white image to serve as the base
