@@ -125,42 +125,43 @@ class ImageViewer(QMainWindow):
         num_infected = selected_region.infected_count
         num_recovered = selected_region.recovered_count
         num_dead = selected_region.dead_count
-        total_population = selected_region.population
+        region_population = selected_region.population
 
-        return num_infected, num_recovered, num_dead, total_population
+        return num_infected, num_recovered, num_dead, region_population
 
     def apply_changes(self):
         # Get selected region and percentage inputs
-        selected_region_index = self.region_dropdown.currentIndex()
+        for selected_region_index in range(0,8):
 
-        # Retrieve statistics for the selected region
-        num_infected, num_recovered, num_dead, total_population = self.get_region_statistics(selected_region_index)
+            # Retrieve statistics for the selected region
+            num_infected, num_recovered, num_dead, region_population = self.get_region_statistics(selected_region_index)
 
-        # Calculate percentages
-        infection_percentage = (num_infected / total_population) * 100
-        recovery_percentage = (num_recovered / total_population) * 100
-        mortality_percentage = (num_dead / total_population) * 100
+            # Calculate percentages
+            infection_percentage = (num_infected / region_population) * 100
+            recovery_percentage = (num_recovered / region_population) * 100
+            mortality_percentage = (num_dead / region_population) * 100
+            
+            print(selected_region_index, mortality_percentage, infection_percentage, recovery_percentage)
+            # Validate percentages
+            if 0 <= infection_percentage <= 100 and 0 <= recovery_percentage <= 100 and 0 <= mortality_percentage <= 100:
+                # Update the percentages for the selected region
+                self.infection_percentages[selected_region_index] = infection_percentage
+                self.immunity_percentages[selected_region_index] = recovery_percentage
+                self.mortality_percentages[selected_region_index] = mortality_percentage
 
-        # Validate percentages
-        if 0 <= infection_percentage <= 100 and 0 <= recovery_percentage <= 100 and 0 <= mortality_percentage <= 100:
-            # Update the percentages for the selected region
-            self.infection_percentages[selected_region_index] = infection_percentage
-            self.immunity_percentages[selected_region_index] = recovery_percentage
-            self.mortality_percentages[selected_region_index] = mortality_percentage
-
-            # Update the label with the modified image
-            self.update_color(selected_region_index)
-        else:
-            print("Percentages must be between 0 and 100.")
+                # Update the label with the modified image
+                self.update_color(selected_region_index)
+            else:
+                print("Percentages must be between 0 and 100.")
 
     def update_color(self, index):
         # Get the original color of the segment
         original_color = self.original_colors[index]
 
         # Calculate the color based on infection, immunity, and mortality percentages
-        infection_percentage = self.infection_percentages[index] / 100
-        immunity_percentage = self.immunity_percentages[index] / 100
-        mortality_percentage = self.mortality_percentages[index] / 100
+        infection_percentage = self.infection_percentages[index]
+        immunity_percentage = self.immunity_percentages[index] 
+        mortality_percentage = self.mortality_percentages[index]
 
         # Calculate colors based on percentages
         infection_color = (255, 0, 0)
@@ -260,6 +261,7 @@ class ImageViewer(QMainWindow):
 
         # Update statistics labels in GUI
         self.updateStatisticsLabels(numInfected, numDead, numRecovered)
+        self.apply_changes()
 
     def run_simulation_day(self):
         # Simulation logic for each day goes here
