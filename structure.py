@@ -121,7 +121,7 @@ def run_simulation(regions, disease_stats, num_days):
             # print(region.name, 'infected', region.infected_count, 'day', day)
             print(f"{day:<5}{region.name:<20}{region.infected_count:<15}")
             # Calculate the number of new infections
-            new_infections = region.infect(infection_rate)
+            region.infect(infection_rate)
 
             region.infect_between_regions(infection_rate, regions)
             # Calculate the number of recoveries
@@ -221,4 +221,3 @@ def initialize_regions():
 # Main block: Reads population data from a CSV file and prints each row.
 if __name__ == '__main__':
     All_Regions = initialize_regions()
-    # run_simulation(All_Regions, COVID, 10)
