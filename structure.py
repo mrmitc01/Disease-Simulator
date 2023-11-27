@@ -2,11 +2,9 @@
 Defines classes for diseases, regions, and statistics. Reads population data from a CSV file.
 """
 import codecs
-from enum import Enum
 import csv
 import random
-import matplotlib.pyplot as plt
-import numpy as np
+from enum import Enum
 
 # REGIONS
 RED_REGION_COUNTIES = ['Trimble', 'Oldham', 'Henry', 'Carroll', 'Shelby', 'Jefferson', 'Bullitt', 'Spencer']
@@ -50,7 +48,7 @@ class Region:
         self.name = name
         self.population = population
         self.land_area = land_area
-        self.populaton_density = population_density
+        self.population_density = population_density
         self.susceptible_count = population
         self.infected_count = 0
         self.recovered_count = 0
@@ -113,7 +111,7 @@ def run_simulation(regions, disease_stats, num_days):
     recovery_rate = disease_stats.recovery
     mortality_rate = disease_stats.mortality
 
-    start_infection(regions)
+    # start_infection(regions)
     # Iterate through each "day" in the simulation
     # print(f"{'Day':<5}{}")
 
@@ -146,10 +144,10 @@ def start_infection(regions):
 
 
 # DISEASES
-COVID = Disease(name="Covid-19", infection=0.2025, recovery=14, mortality=0.027)
-MEASLES = Disease(name="Measles", infection=0.6329, recovery=7, mortality=0.0001)
-FLU = Disease(name="Generic flu", infection=0.0759, recovery=10, mortality=0.0001)
-EBOLA = Disease(name="Ebola", infection=0.0886, recovery=30, mortality=0.60)
+COVID = Disease(name="Covid-19", infection=0.2025, recovery=0.85, mortality=0.027)
+MEASLES = Disease(name="Measles", infection=0.6329, recovery=0.85, mortality=0.0001)
+FLU = Disease(name="Generic flu", infection=0.0759, recovery=0.95, mortality=0.0001)
+EBOLA = Disease(name="Ebola", infection=0.0886, recovery=0.30, mortality=0.60)
 
 
 def initialize_regions():
@@ -177,47 +175,47 @@ def initialize_regions():
                 red_region.population += int(row[population_column_index])
                 red_region.susceptible_count += int(row[population_column_index])
                 red_region.land_area += float(row[land_area_column_index])
-                red_region.populaton_density += float(row[population_column_index])
+                red_region.population_density += float(row[population_column_index])
             elif county in YELLOW_REGION_COUNTIES:
                 yellow_region.population += int(row[population_column_index])
                 yellow_region.susceptible_count += int(row[population_column_index])
                 yellow_region.land_area += float(row[land_area_column_index])
-                yellow_region.populaton_density += float(row[population_column_index])
+                yellow_region.population_density += float(row[population_column_index])
             elif county in ORANGE_REGION_COUNTIES:
                 orange_region.population += int(row[population_column_index])
                 orange_region.susceptible_count += int(row[population_column_index])
                 orange_region.land_area += float(row[land_area_column_index])
-                orange_region.populaton_density += float(row[population_column_index])
+                orange_region.population_density += float(row[population_column_index])
             elif county in PINK_REGION_COUNTIES:
                 pink_region.population += int(row[population_column_index])
                 pink_region.susceptible_count += int(row[population_column_index])
                 pink_region.land_area += float(row[land_area_column_index])
-                pink_region.populaton_density += float(row[population_column_index])
+                pink_region.population_density += float(row[population_column_index])
             elif county in BROWN_REGION_COUNTIES:
                 brown_region.population += int(row[population_column_index])
                 brown_region.susceptible_count += int(row[population_column_index])
                 brown_region.land_area += float(row[land_area_column_index])
-                brown_region.populaton_density += float(row[population_column_index])
+                brown_region.population_density += float(row[population_column_index])
             elif county in BLUE_REGION_COUNTIES:
                 blue_region.population += int(row[population_column_index])
                 blue_region.susceptible_count += int(row[population_column_index])
                 blue_region.land_area += float(row[land_area_column_index])
-                blue_region.populaton_density += float(row[population_column_index])
+                blue_region.population_density += float(row[population_column_index])
             elif county in MAROON_REGION_COUNTIES:
                 maroon_region.population += int(row[population_column_index])
                 maroon_region.susceptible_count += int(row[population_column_index])
                 maroon_region.land_area += float(row[land_area_column_index])
-                maroon_region.populaton_density += float(row[population_column_index])
+                maroon_region.population_density += float(row[population_column_index])
             elif county in GRAY_REGION_COUNTIES:
                 gray_region.population += int(row[population_column_index])
                 gray_region.susceptible_count += int(row[population_column_index])
                 gray_region.land_area += float(row[land_area_column_index])
-                gray_region.populaton_density += float(row[population_column_index])
+                gray_region.population_density += float(row[population_column_index])
 
-    All_Regions = [red_region, orange_region, yellow_region, pink_region, brown_region, blue_region, maroon_region,
-                   gray_region]
+    All_Regions_List = [red_region, orange_region, yellow_region, pink_region, brown_region, blue_region, maroon_region,
+                        gray_region]
 
-    return All_Regions
+    return All_Regions_List
 
 
 # Main block: Reads population data from a CSV file and prints each row.

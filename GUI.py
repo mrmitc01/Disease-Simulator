@@ -3,7 +3,7 @@ from PIL import Image, ImageQt
 from PyQt6.QtCore import QTimer
 from PyQt6.QtGui import QPixmap, QIcon
 from PyQt6.QtWidgets import QApplication, QLabel, QMainWindow, QVBoxLayout, QWidget, QPushButton, QComboBox, QHBoxLayout
-from structure import initialize_regions, run_simulation, COVID
+from structure import initialize_regions, run_simulation, COVID, start_infection
 
 
 class ImageViewer(QMainWindow):
@@ -26,6 +26,7 @@ class ImageViewer(QMainWindow):
 
         self.segment_paths = segment_paths
         self.All_Regions = All_Regions
+        self.infection_started = False  # Add a flag to track if infection has started
         self.segment_images = [Image.open(path) for path in segment_paths]
         self.infection_percentages = [0.0] * len(segment_paths)
         self.immunity_percentages = [0.0] * len(segment_paths)
@@ -210,6 +211,9 @@ class ImageViewer(QMainWindow):
         self.redraw_all_segments()
 
     def start_simulation(self):
+        if not self.infection_started:
+            start_infection(self.All_Regions)  # Start the infection once at the beginning
+            self.infection_started = True  # Update the flag to indicate infection started
         self.timer.start(1000)  # Adjust the interval (in milliseconds) as needed
         print("Simulation started.")
 
@@ -238,6 +242,9 @@ class ImageViewer(QMainWindow):
         self.infectedLabel.setText("Total Infected: " + str(self.totalInfected))
         self.deadLabel.setText("Total Dead: " + str(self.totalDead))
         self.recoveredLabel.setText("Total Recovered: " + str(self.totalRecovered))
+
+        # Ensure the simulation starts with a fresh state
+        self.infection_started = False  # Update the flag to indicate infection start
 
         # Redraw all segments to reflect the reset state
         self.redraw_all_segments()
