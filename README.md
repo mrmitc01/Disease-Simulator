@@ -1,9 +1,6 @@
 # Disease-Simulator
 
 ## To do
-### Disease selection dropdown - make this actually change the disease
-### Put Day and total cases with the statistics on the GUI
-### When reset button is clicked, reset the colors as well
 ### Fix bug with colors - some regions turn all black at the beginning for some reason
 
 ## Overview

@@ -4,7 +4,7 @@ from PyQt6.QtCore import QTimer
 from PyQt6.QtGui import QPixmap, QIcon
 from PyQt6.QtWidgets import QApplication, QLabel, QMainWindow, QVBoxLayout, QWidget, QPushButton, QComboBox, \
     QHBoxLayout, QMessageBox
-from structure import initialize_regions, run_simulation, COVID, start_infection
+from structure import initialize_regions, run_simulation, COVID, start_infection, MEASLES, FLU, EBOLA
 
 
 class ImageViewer(QMainWindow):
@@ -36,6 +36,15 @@ class ImageViewer(QMainWindow):
         self.mortality_percentages = [0.0] * len(segment_paths)
         self.original_colors = [image.getpixel((0, 0)) for image in self.segment_images]
 
+        self.legend_label = QLabel(
+            "<span style='color:red'><span style='background-color:red;'>&nbsp;&nbsp;&nbsp;</span> Red: "
+            "Infected</span><br>"
+            "<span style='color:blue'><span style='background-color:blue;'>&nbsp;&nbsp;&nbsp;</span> Blue: "
+            "Immune/Recovered</span><br>"
+            "<span style='color:black'><span style='background-color:black;'>&nbsp;&nbsp;&nbsp;</span> Black: "
+            "Mortality</span><br>"
+        )
+
         self.central_widget = QWidget(self)
         self.setCentralWidget(self.central_widget)
 
@@ -57,6 +66,8 @@ class ImageViewer(QMainWindow):
         self.disease_dropdown = QComboBox(self)
         self.disease_dropdown.addItems(["COVID-19", "Measles", "Generic flu", "Ebola"])
         default_disease_index = 0  # Set the index of the default region (e.g., Custom)
+        self.current_disease = COVID  # Initialize with the default disease
+        self.disease_dropdown.currentIndexChanged.connect(self.change_disease)
         self.disease_dropdown.setCurrentIndex(default_disease_index)
 
         # Add a view stats button
@@ -89,6 +100,9 @@ class ImageViewer(QMainWindow):
 
         label_combined_layout.addWidget(self.label_widget)  # Add the label widget to the layout
         label_combined_layout.addWidget(self.combined_label)  # Add the combined label to the layout
+
+        self.layout.addWidget(self.legend_label)
+        self.layout.addStretch()  # Add spacing between the legend and the map
 
         self.layout.addLayout(label_combined_layout)  # Add the QHBoxLayout to the main layout
 
@@ -130,11 +144,26 @@ class ImageViewer(QMainWindow):
         self.days_elapsed = 0
         self.total_cases = 0
         self.statusBar.showMessage(f"Days Elapsed: {self.days_elapsed} - Total Cases: {self.total_cases}")
+        self.disease_label = QLabel("Current Disease: " + self.current_disease.name)
+        self.statusBar.addPermanentWidget(self.disease_label)
 
         self.central_widget.setLayout(self.layout)
 
         self.setWindowTitle('Disease Simulation')
         self.redraw_all_segments()
+
+    def change_disease(self, index):
+        if index == 0:
+            self.current_disease = COVID
+        elif index == 1:
+            self.current_disease = MEASLES
+        elif index == 2:
+            self.current_disease = FLU
+        elif index == 3:
+            self.current_disease = EBOLA
+
+        # Update the disease label text
+        self.disease_label.setText("Current Disease: " + self.current_disease.name)
 
     def view_stats(self):
         selected_region_index = self.region_dropdown.currentIndex()
@@ -147,8 +176,8 @@ class ImageViewer(QMainWindow):
             f"Infected Count: {selected_region.infected_count}\n"
             f"Recovered Count: {selected_region.recovered_count}\n"
             f"Dead Count: {selected_region.dead_count}\n"
-            f"Susceptible Count: {selected_region.susceptible_count}\n"
-            f"Population Density: {selected_region.population_density}\n"
+            # f"Susceptible Count: {selected_region.susceptible_count}\n"
+            # f"Population Density: {selected_region.population_density}\n"
         )
         QMessageBox.information(self, "Region Stats", stats_message)
 
@@ -307,7 +336,7 @@ class ImageViewer(QMainWindow):
 
     def run_simulation_day(self):
         # Simulation logic for each day goes here
-        run_simulation(self.All_Regions, COVID, 1)
+        run_simulation(self.All_Regions, self.current_disease, 1)
 
         # Calculate statistics from the simulation results
         numInfected = sum(region.infected_count for region in self.All_Regions)
