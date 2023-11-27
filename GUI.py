@@ -1,10 +1,8 @@
-from PyQt6.QtCore import QTimer
-from PyQt6.QtWidgets import QApplication, QLabel, QMainWindow, QVBoxLayout, QWidget, QPushButton, QComboBox, QLineEdit, \
-    QHBoxLayout
-from PyQt6.QtGui import QPixmap, QImage, QColor, QIcon
 import sys
 from PIL import Image, ImageQt
-
+from PyQt6.QtCore import QTimer
+from PyQt6.QtGui import QPixmap, QIcon
+from PyQt6.QtWidgets import QApplication, QLabel, QMainWindow, QVBoxLayout, QWidget, QPushButton, QComboBox, QHBoxLayout
 from structure import initialize_regions, run_simulation, COVID
 
 
@@ -65,31 +63,13 @@ class ImageViewer(QMainWindow):
 
         # Dropdown for disease selection
         self.disease_dropdown = QComboBox(self)
-        self.disease_dropdown.addItems(["Custom", "COVID-19", "Measles", "Generic flu", "Ebola"])
+        self.disease_dropdown.addItems(["COVID-19", "Measles", "Generic flu", "Ebola"])
         default_disease_index = 0  # Set the index of the default region (e.g., Custom)
         self.disease_dropdown.setCurrentIndex(default_disease_index)
-        self.disease_dropdown.currentIndexChanged.connect(self.update_fields_on_disease_change)
         self.selection_layout.addWidget(self.region_dropdown)
         self.selection_layout.addWidget(self.disease_dropdown)
 
         self.layout.addLayout(self.selection_layout)  # Add the selection layout
-
-        # LineEdits for percentage inputs
-        self.infection_input = QLineEdit(self)
-        self.infection_input.setPlaceholderText("Enter Infection Percentage (0-100)")
-        self.immunity_input = QLineEdit(self)
-        self.immunity_input.setPlaceholderText("Enter Immunity Percentage (0-100)")
-        self.mortality_input = QLineEdit(self)
-        self.mortality_input.setPlaceholderText("Enter Mortality Percentage (0-100)")
-
-        # Create a horizontal layout for the line edits
-        line_edit_layout = QHBoxLayout()
-        line_edit_layout.addWidget(self.infection_input)
-        line_edit_layout.addWidget(self.immunity_input)
-        line_edit_layout.addWidget(self.mortality_input)
-
-        # Add the line edits layout to the input layout
-        self.input_layout.addLayout(line_edit_layout)
 
         # Button to apply changes
         apply_button = QPushButton("Apply Changes", self)
@@ -139,74 +119,38 @@ class ImageViewer(QMainWindow):
         self.setWindowTitle('Disease Simulation')
         self.redraw_all_segments()
 
+    def get_region_statistics(self, region_index):
+        selected_region = self.All_Regions[region_index]
+        num_infected = selected_region.infected_count
+        num_recovered = selected_region.recovered_count
+        num_dead = selected_region.dead_count
+        total_population = selected_region.population
+
+        return num_infected, num_recovered, num_dead, total_population
+
     def apply_changes(self):
         # Get selected region and percentage inputs
         selected_region_index = self.region_dropdown.currentIndex()
-        infection_text = self.infection_input.text()
-        immunity_text = self.immunity_input.text()
-        mortality_text = self.mortality_input.text()
 
-        try:
-            # Convert percentages to float
-            infection_percentage = float(infection_text)
-            immunity_percentage = float(immunity_text)
-            mortality_percentage = float(mortality_text)
+        # Retrieve statistics for the selected region
+        num_infected, num_recovered, num_dead, total_population = self.get_region_statistics(selected_region_index)
 
-            # Validate percentages
-            if 0 <= infection_percentage <= 100 and 0 <= immunity_percentage <= 100 and 0 <= mortality_percentage <= 100:
-                # Get the population of the selected region
-                selected_region_population = self.All_Regions[selected_region_index].population
+        # Calculate percentages
+        infection_percentage = (num_infected / total_population) * 100
+        recovery_percentage = (num_recovered / total_population) * 100
+        mortality_percentage = (num_dead / total_population) * 100
 
-                # Convert counts to percentages
-                infection_count_percentage = self.totalInfected / selected_region_population * 100
-                immunity_count_percentage = self.totalRecovered / selected_region_population * 100
-                mortality_count_percentage = self.totalDead / selected_region_population * 100
+        # Validate percentages
+        if 0 <= infection_percentage <= 100 and 0 <= recovery_percentage <= 100 and 0 <= mortality_percentage <= 100:
+            # Update the percentages for the selected region
+            self.infection_percentages[selected_region_index] = infection_percentage
+            self.immunity_percentages[selected_region_index] = recovery_percentage
+            self.mortality_percentages[selected_region_index] = mortality_percentage
 
-                # Update the percentages for the selected region
-                self.infection_percentages[selected_region_index] = infection_percentage
-                self.immunity_percentages[selected_region_index] = immunity_percentage
-                self.mortality_percentages[selected_region_index] = mortality_percentage
-
-                # Update the label with the modified image
-                self.update_color(selected_region_index)
-            else:
-                print("Percentages must be between 0 and 100.")
-        except ValueError:
-            print("Invalid percentage. Please enter a number between 0 and 100.")
-
-    def update_fields_on_disease_change(self):
-        selected_disease = self.disease_dropdown.currentText()
-
-        # Scale factor for converting raw values to percentages (assuming a maximum value)
-        max_infection = 100.0
-        max_immunity = 100.0
-        max_mortality = 100.0
-
-        if selected_disease == "COVID-19":
-            # Set default values for COVID-19
-            self.infection_input.setText(str((5.0 / max_infection) * 100))  # Scaled to percentage
-            self.immunity_input.setText(str((10.0 / max_immunity) * 100))  # Scaled to percentage
-            self.mortality_input.setText(str((2.0 / max_mortality) * 100))  # Scaled to percentage
-        elif selected_disease == "Measles":
-            # Set values for Measles
-            self.infection_input.setText(str(12.0 / max_infection * 100))  # Scaled to percentage
-            self.immunity_input.setText(str(20.0 / max_immunity * 100))  # Scaled to percentage
-            self.mortality_input.setText(str(5.0 / max_mortality * 100))  # Scaled to percentage
-        elif selected_disease == "Generic flu":
-            # Set values for Generic flu
-            self.infection_input.setText(str(8.0 / max_infection * 100))  # Scaled to percentage
-            self.immunity_input.setText(str(15.0 / max_immunity * 100))  # Scaled to percentage
-            self.mortality_input.setText(str(3.0 / max_mortality * 100))  # Scaled to percentage
-        elif selected_disease == "Ebola":
-            # Set values for Ebola
-            self.infection_input.setText(str(50.0 / max_infection * 100))  # Scaled to percentage
-            self.immunity_input.setText(str(5.0 / max_immunity * 100))  # Scaled to percentage
-            self.mortality_input.setText(str(70.0 / max_mortality * 100))  # Scaled to percentage
-        elif selected_disease == "Custom":
-            # Clear values for custom inputs
-            self.infection_input.clear()
-            self.immunity_input.clear()
-            self.mortality_input.clear()
+            # Update the label with the modified image
+            self.update_color(selected_region_index)
+        else:
+            print("Percentages must be between 0 and 100.")
 
     def update_color(self, index):
         # Get the original color of the segment
@@ -312,7 +256,7 @@ class ImageViewer(QMainWindow):
 
     def run_simulation_day(self):
         # Simulation logic for each day goes here
-        run_simulation(self.All_Regions, COVID, self.days_elapsed)
+        run_simulation(self.All_Regions, COVID, 1)
 
         # Calculate statistics from the simulation results
         numInfected = sum(region.infected_count for region in self.All_Regions)

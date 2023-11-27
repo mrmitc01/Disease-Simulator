@@ -72,8 +72,10 @@ class Region:
     # for the disease
     def infect(self, infection_rate):
         new_infections = min(self.susceptible_count, int(self.infected_count * infection_rate))
+        new_infections = max(0, new_infections)  # Ensure new_infections is non-negative
         self.susceptible_count -= new_infections
         self.infected_count += new_infections
+        return new_infections
 
     # Function updates the number of infected and susceptible people across regions based on the rates defined for
     # the disease
@@ -81,8 +83,10 @@ class Region:
         region_to_infect = random.choice(regions)
         new_infections = min(region_to_infect.susceptible_count,
                              int(self.infected_count + region_to_infect.infected_count * infection_rate))
+        new_infections = max(0, new_infections)  # Ensure new_infections is non-negative
         region_to_infect.susceptible_count -= new_infections
         region_to_infect.infected_count += new_infections
+        return new_infections
 
     # Function updates the number of infected and recovered people based on the rates defined for the disease
     def recover(self, recovery_rate):
