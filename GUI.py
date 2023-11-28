@@ -207,7 +207,6 @@ class ImageViewer(QMainWindow):
             recovery_percentage = (num_recovered / region_population) * 100
             mortality_percentage = (num_dead / region_population) * 100
 
-            print(selected_region_index, mortality_percentage, infection_percentage, recovery_percentage)
             # Validate percentages
             if 0 <= infection_percentage <= 100 and 0 <= recovery_percentage <= 100 and 0 <= mortality_percentage <= 100:
                 # Update the percentages for the selected region
