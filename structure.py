@@ -133,9 +133,6 @@ def run_simulation(regions, disease_stats, num_days):
             # Update the percentages
             region.update_percentages()
 
-        print(f"Day {day + 1} - Total cases: {sum(region.get_total_cases() for region in regions)}")
-
-
 # Start the infection in a random region
 def start_infection(regions):
     start_region = random.choice(regions)
